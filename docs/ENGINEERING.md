@@ -20,6 +20,7 @@ npm run format:check # Prettier check (CI)
 
 ```bash
 bash scripts/extract-design-images.sh
+bash scripts/crop-homepage-images.sh
 ```
 
 Extracts Canva PNGs from `design/game gear.zip` into `src/assets/dev/canva-exports/` (gitignored, temporary).

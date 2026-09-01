@@ -1,3 +1,9 @@
+import categoryCommunication from '@/assets/images/home/category-communication.webp'
+import categoryComputer from '@/assets/images/home/category-computer.webp'
+import categoryEntertainment from '@/assets/images/home/category-entertainment.webp'
+import categoryPhotography from '@/assets/images/home/category-photography.webp'
+import categoryPower from '@/assets/images/home/category-power.webp'
+import categoryWearable from '@/assets/images/home/category-wearable.webp'
 import type { Category } from '@/types/category'
 
 /**
@@ -8,6 +14,8 @@ export const categories: Category[] = [
   {
     slug: 'communication-gadgets',
     name: 'Communication Gadgets',
+    cardLabel: 'Communication gadgets',
+    cardImage: categoryCommunication,
     designFile: '2.png',
     subCategories: [
       { slug: 'smartphones', name: 'Smartphones' },
@@ -18,6 +26,8 @@ export const categories: Category[] = [
   {
     slug: 'entertainment-gadgets',
     name: 'Entertainment Gadgets',
+    cardLabel: 'Entertainment gadgets',
+    cardImage: categoryEntertainment,
     designFile: '3.png',
     subCategories: [
       { slug: 'tv', name: 'TV' },
@@ -29,6 +39,8 @@ export const categories: Category[] = [
   {
     slug: 'computer-gadgets',
     name: 'Computer Gadgets',
+    cardLabel: 'Computer gadgets',
+    cardImage: categoryComputer,
     designFile: '4.png',
     subCategories: [
       { slug: 'laptops', name: 'Laptops' },
@@ -39,6 +51,8 @@ export const categories: Category[] = [
   {
     slug: 'wearable-gadgets',
     name: 'Wearable Gadgets',
+    cardLabel: 'Wearable gadgets',
+    cardImage: categoryWearable,
     designFile: '5.png',
     subCategories: [
       { slug: 'fitness-trackers', name: 'Fitness trackers' },
@@ -49,6 +63,8 @@ export const categories: Category[] = [
   {
     slug: 'photography-gadgets',
     name: 'Photography Gadgets',
+    cardLabel: 'Photography gadgets',
+    cardImage: categoryPhotography,
     designFile: '6.png',
     subCategories: [
       { slug: 'digital-cameras', name: 'Digital cameras' },
@@ -59,7 +75,10 @@ export const categories: Category[] = [
   {
     slug: 'power-charging-gadgets',
     name: 'Power & Charging Gadgets',
+    cardLabel: 'Power and charging gadgets',
+    cardImage: categoryPower,
     designFile: '7.png',
+    offsetCard: true,
     subCategories: [
       { slug: 'chargers', name: 'Chargers' },
       { slug: 'power-banks', name: 'Power banks' },

@@ -6,7 +6,10 @@ export interface SubCategory {
 export interface Category {
   slug: string
   name: string
+  cardLabel: string
+  cardImage?: string
   designFile: string
+  offsetCard?: boolean
   subCategories: SubCategory[]
 }
 
