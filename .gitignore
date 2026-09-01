@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vite
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Supabase local
+.supabase/
+
+# Temporary analysis artifacts (not source design assets)
+.design-extract/
+.explore-output.txt
+.explore.sh
+.nexus-explore.sh
+.nexus-explore.txt
+.search-output.txt
+.search.sh
+.extract-design.sh
+.image-info.sh
+.image-info.txt
+.test-write
