@@ -1,332 +1,492 @@
 # CMS Architecture — GameGear Nexus
 
 > **Backend:** Supabase (PostgreSQL + Storage + Auth)  
-> **Status:** Planned — not implemented  
-> **Principle:** Content editors manage copy and media without touching React source code.
+> **Phase:** 2A — Planning (not implemented)  
+> **Principle:** The Phase 1 static frontend is the source of truth for content boundaries. The CMS wraps what already exists — it does not reshape the UI.
 
 ---
 
 ## 1. Goals
 
-1. Non-developers can update site content (text, images, categories, contact info)
-2. Content changes publish without redeploying the frontend (Phase 2+) or with ISR/cache invalidation
-3. Media assets managed through Supabase Storage, not git
-4. Admin access protected by Supabase Auth + RLS
-5. Public site reads only published content via anon key
+1. Non-developers can edit site copy, categories, pills, and images without changing React source
+2. Content updates do not require redeploying the frontend (client fetch + cache invalidation)
+3. Media lives in Supabase Storage — not git, not PostgreSQL blobs
+4. Admin access is protected by Supabase Auth + RLS
+5. Public site reads **published** content only via the anon key
+6. Visual components remain unchanged — only the data source switches
 
 ---
 
-## 2. Content Classification
+## 2. Static Data Inventory (Phase 1 Audit)
 
-### CMS-Managed (dynamic)
+Complete inventory of hardcoded content as of commit `0b2db6f`.
 
-| Content | Entity | Priority |
-|---------|--------|----------|
-| Site name, tagline, logo | `site_settings` | High |
-| Contact phone, email | `site_settings` | High |
-| Social media URLs | `social_links` | High |
-| Homepage hero headline + CTA | `hero_section` | High |
-| Feature cards (3) | `features` | High |
-| "What we are about" text | `site_settings` or `content_blocks` | High |
-| Promo banner text | `content_blocks` | Medium |
-| Categories (6) | `categories` | High |
-| Sub-categories (per category) | `sub_categories` | High |
-| Category collage images | `category_media` | High |
-| Homepage category card images | `categories` | High |
-| Contact photo grid (8 images) | `media_assets` | Medium |
-| Future: products/gadgets | `products` | Phase 3 |
-| Future: reviews | `reviews` | Phase 3 |
-| Future: articles/insights | `articles` | Phase 3 |
-| Future: contact form submissions | `contact_submissions` | Phase 3 |
+### 2.1 `src/data/site-settings.ts`
 
-### Static (code-level)
+| Field | Example | Classification |
+|-------|---------|----------------|
+| `siteName` | GameGear Nexus | **CMS** → `site_settings` |
+| `tagline` | DISCOVER. COMPARE. DOMINATE. | **CMS** → `site_settings` |
+| `heroHeadline` | Next-Gen Gear, Expertly Reviewed. | **CMS** → `site_settings` |
+| `heroCtaText` | VIEW PROPERTIES | **CMS** → `site_settings` |
+| `heroCtaHref` | #explore-solutions | **CMS** → `site_settings` |
+| `aboutHeading` | What we are about | **CMS** → `site_settings` |
+| `aboutBody` | paragraph | **CMS** → `site_settings` |
+| `exploreHeading` | Explore our solutions | **CMS** → `site_settings` |
+| `promoBannerText` | Power up your next-level… | **CMS** → `site_settings` |
+| `contactHeading` | CONTACT US! | **CMS** → `site_settings` |
+| `contactPhone` | 0793510481 | **CMS** → `site_settings` |
+| `contactEmail` | jetagakoi@gmail.com | **CMS** → `site_settings` |
+| `contactAnchor` | #contact | **App config** (routing constant) |
+| `socialLinks[]` | platform, label, href | **CMS** → `social_links` |
 
-| Content | Reason |
-|---------|--------|
-| Layout structure | Tied to React components |
-| Design tokens (colors, fonts, spacing) | Design system — rarely changes |
-| Route definitions | Application logic |
-| Component behavior | Application logic |
-| SEO defaults / fallback meta | Code with CMS override |
-| Error pages | Application logic |
-| Animation definitions | Application logic |
+### 2.2 `src/data/features.ts`
 
-### Hybrid (code structure + CMS content)
+| Field | Classification |
+|-------|----------------|
+| `id` | Stable key → DB UUID + optional `key` slug |
+| `title` | **CMS** |
+| `description` | **CMS** (card + detail copy) |
+| `image` | **Media** → `media_assets` + Storage |
+| `imageAlt` | **CMS** |
 
-| Element | Code | CMS |
-|---------|------|-----|
-| Homepage sections | Section order, layout | Text, images within sections |
-| Category page template | Layout, collage positioning | Title, sub-categories, images |
-| Navigation | Route mapping | Labels, ordering, visibility |
-| Footer/Contact | Component structure | Contact details, social links |
+3 rows — homepage feature cards + supporting copy.
 
----
+### 2.3 `src/data/categories.ts`
 
-## 3. Architecture Diagram
+| Field | Classification |
+|-------|----------------|
+| `slug` | **CMS** (stable URL identifier) |
+| `name` | **CMS** (internal/admin name) |
+| `displayTitle` | **CMS** (category page H1, e.g. COMMUNICATION GADGETS) |
+| `cardLabel` | **CMS** (homepage card label) |
+| `cardImage` | **Media** → FK to `media_assets` |
+| `designFile` | **App config** (dev reference only — not stored in DB) |
+| `offsetCard` | **CMS** (homepage grid layout flag) |
+| `subCategories[]` | **CMS** → `category_pills` |
+| `subCategories[].slug` | **CMS** (stable pill identifier) |
+| `subCategories[].name` | **CMS** (pill label) |
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                    Public Website (SPA)                   │
-│                                                          │
-│  React hooks → Supabase JS client (anon key)             │
-│  Reads: categories, features, settings, media URLs       │
-└────────────────────────┬─────────────────────────────────┘
-                         │ HTTPS (SELECT only, RLS enforced)
-                         ▼
-┌──────────────────────────────────────────────────────────┐
-│                      Supabase                             │
-│                                                          │
-│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │ PostgreSQL  │  │   Storage    │  │     Auth      │  │
-│  │  (content)  │  │   (media)    │  │   (admins)    │  │
-│  └─────────────┘  └──────────────┘  └───────────────┘  │
-│                                                          │
-│  RLS Policies:                                           │
-│  • anon/authenticated → SELECT published content         │
-│  • admin role → INSERT/UPDATE/DELETE                     │
-└────────────────────────┬─────────────────────────────────┘
-                         │ HTTPS (authenticated)
-                         ▼
-┌──────────────────────────────────────────────────────────┐
-│              Admin Dashboard (Phase 3)                    │
-│                                                          │
-│  Supabase JS client (authenticated session)              │
-│  CRUD: all content entities + file uploads               │
-└──────────────────────────────────────────────────────────┘
-```
+6 categories, 19 pills total.
 
----
+### 2.4 `src/data/category-collages.ts`
 
-## 4. Data Flow
+| Field | Classification |
+|-------|----------------|
+| `containerClassName` | **App config** (responsive min-heights — mapped from `container_variant`) |
+| `images[]` | **CMS** → `collage_layers` (type=image) |
+| `images[].id` | Stable `layer_key` in DB |
+| `images[].src` | **Media** → `media_assets` |
+| `images[].alt` | **CMS** |
+| `images[].className` | **Decomposed** → numeric position + variant enums in DB; CSS mapping in code |
+| `images[].decorative` | **CMS** |
+| `panels[]` | **CMS** → `collage_layers` (type=panel) |
+| `panels[].className` | **Decomposed** → `panel_variant` enum + numeric position in DB |
+| `overlayText` | **CMS** → fields on `category_collages` |
 
-### Public Read Path
-```
-Page component
-  → useCategories() / useSiteSettings() hook
-    → supabase.from('categories').select('*').eq('published', true)
-      → RLS validates anon read access
-        → Return typed data to component
-```
+24 collage images across 6 categories. 11 decorative panels. 1 overlay text (communication only).
 
-### Admin Write Path (Phase 3)
-```
-Admin form submit
-  → supabase.from('categories').update({ ... }).eq('id', id)
-    → RLS validates admin role via auth.uid()
-      → Postgres trigger updates updated_at
-        → Optional: cache invalidation webhook
-```
+### 2.5 Component-level static content
 
-### Media Upload Path
-```
-Admin selects file
-  → supabase.storage.from('media').upload(path, file)
-    → Returns storage path
-      → Save path in entity record (categories.image_path, etc.)
-        → Public URL constructed at render time
-```
+| Location | Content | Classification |
+|----------|---------|----------------|
+| `HeroBrandLogo.tsx` | SVG logo geometry | **App config** (Phase 2: optional logo upload replaces) |
+| `BrandLogo.tsx` | SVG icon | **App config** |
+| `CategoryCard.tsx` | Arrow icon SVG | **App config** |
+| `SocialLinks.tsx` | Icon SVG paths | **App config** |
+| `PillButton.tsx` | Pill styling | **App config** |
+| `tailwind.config.ts` | Design tokens | **App config** |
+| `routes/router.tsx` | Route paths | **App config** |
+
+### 2.6 Media assets (38 files)
+
+**Homepage (`src/assets/images/home/`) — 14 files:**
+
+| File | Used by | Classification |
+|------|---------|----------------|
+| `hero-background.webp` | HeroSection | **Media** |
+| `hero-phone.webp` | HeroSection | **Media** |
+| `feature-ai.webp` | features[0] | **Media** |
+| `feature-gaming.webp` | features[1] | **Media** |
+| `feature-audio.webp` | features[2] | **Media** |
+| `feature-section-bg.webp` | FeatureGrid | **Media** → `content_blocks` |
+| `promo-banner-bg.webp` | PromoBanner | **Media** → `content_blocks` |
+| `contact-grid.webp` | ContactSection | **Media** (composite; future: 8 individual) |
+| `category-*.webp` (×6) | categories cardImage | **Media** |
+
+**Category collages (`src/assets/images/category/{slug}/`) — 24 files:**
+
+Mapped per category in `category-collages.ts`. All **Media** → Storage under `media/categories/{slug}/`.
 
 ---
 
-## 5. Supabase Services Usage
+## 3. Content Classification Summary
 
-| Service | Usage |
-|---------|-------|
-| **PostgreSQL** | All structured content (categories, settings, features, future products/reviews) |
-| **Storage** | Images, icons, future document uploads |
-| **Auth** | Admin login only (no public user accounts initially) |
-| **Edge Functions** | Contact form handler (spam protection, email notification) — Phase 3 |
-| **Realtime** | Not needed initially; optional for admin live preview |
-| **RLS** | All tables in `public` schema |
+### A. CMS-managed (PostgreSQL + Storage)
+
+- Site settings (name, tagline, hero, about, promo, contact)
+- Social links
+- Feature cards (title, description, alt, image ref)
+- Content block backgrounds (feature section, promo banner)
+- Categories (slug, names, titles, labels, ordering, offset flag, card image)
+- Category pills (labels, ordering — decorative for now)
+- Collage composition (layers, panels, overlay text, image refs)
+- Contact grid images (Phase 1: 1 composite; schema supports 8)
+- All image metadata (path, alt, dimensions)
+
+### B. Application configuration (code)
+
+- React component structure and section order
+- Routing (`/`, `/:categorySlug`, `/contact` redirect)
+- Design tokens (Tailwind config)
+- Collage **rendering engine** — maps DB position/variant enums → CSS
+- Panel variant definitions (dark-overlay, white-window, etc.)
+- Clip-path variant definitions (chamfer-bl, notch-tr, etc.)
+- Container responsive height defaults
+- CategoryBackNav (usability addition)
+- Pill/button visual styling
+- Logo SVG geometry (until logo upload is added)
+- `designFile` dev references
+
+### C. Media (Supabase Storage)
+
+- All `.webp` images currently in `src/assets/images/`
+- Future: product images, review hero images, article images (Phase 3)
 
 ---
 
-## 6. Authentication & Authorization
+## 4. Comparison with Pre-Phase-1 Plan
 
-### Roles
+| Original plan | Status after Phase 1 audit |
+|---------------|--------------------------|
+| `site_settings` | **Valid** — extend with hero, about, promo, contact fields (merge `hero_section` into it) |
+| `hero_section` separate table | **Change** — merge into `site_settings` to match `site-settings.ts` |
+| `features` | **Valid** — add `image_alt`, optional stable `key` |
+| `content_blocks` | **Valid** — promo banner + feature section background |
+| `categories` | **Extend** — add `display_title`, `card_label`, `offset_card`; remove unused `card_icon_path` |
+| `sub_categories` | **Rename** → `category_pills` (decorative, no routes yet) |
+| `category_media` | **Replace** → `category_collages` + `collage_layers` (supports panels + positioning) |
+| `contact_grid_images` | **Valid** — note Phase 1 uses 1 composite image |
+| `media_assets` | **Valid** — central media registry |
+| `navigation_items` | **Defer** — not used in Phase 1; CategoryBackNav is code-level |
+| Tailwind in DB | **Reject** — position data as percentages + variant enums only |
 
-| Role | Implementation | Permissions |
-|------|---------------|-------------|
-| `anon` | Default Supabase role | Read published content |
-| `authenticated` | Logged-in admin | Full CRUD on content tables |
-| `service_role` | Server-side only | Bypass RLS (Edge Functions only) |
+---
 
-### Admin User Management
-- Admins created manually via Supabase dashboard or seed script
-- No public sign-up endpoint
-- Store admin flag in `app_metadata` (not `user_metadata` — security requirement)
-- Example: `{ "role": "admin" }` in `raw_app_meta_data`
+## 5. Architecture Diagram
 
-### RLS Pattern (conceptual)
-```sql
--- Public read
-CREATE POLICY "Public read published categories"
-  ON categories FOR SELECT
-  USING (published = true);
-
--- Admin write
-CREATE POLICY "Admin full access"
-  ON categories FOR ALL
-  USING (auth.jwt() -> 'app_metadata' ->> 'role' = 'admin');
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Public SPA (React)                       │
+│                                                              │
+│  Pages → Services → (static fallback | Supabase client)     │
+│  Components consume normalized domain types only               │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ anon key, SELECT published
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                        Supabase                              │
+│  PostgreSQL          Storage (media/)        Auth (admins)    │
+│  RLS: public read    Public read             app_metadata    │
+│       admin write    Admin write only        role=admin      │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ authenticated
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Admin UI (Phase 3 — not yet built)              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 7. Storage Buckets
+## 6. Collage Data Strategy
 
-| Bucket | Public | Purpose |
-|--------|--------|---------|
-| `media` | Yes (read) | Production images (categories, features, collages) |
-| `uploads` | No | Draft/unpublished uploads |
+### Problem
 
-### File Organization
+Phase 1 stores collage composition as Tailwind class strings in `category-collages.ts`. This must not be copied into the database.
+
+### Solution: separate content from rendering
+
+**Database stores:**
+- Which image (media FK)
+- Alt text, decorative flag
+- Layer type (image | panel)
+- Normalized position: `pos_left_pct`, `pos_top_pct`, `width_pct`, `height_pct` (0–100)
+- `z_index`, `rotation_deg`, `opacity`
+- `clip_variant` enum: `none`, `chamfer_bottom_left`, `notch_top_right`
+- `panel_variant` enum: `dark_overlay`, `white_window`, `burgundy`, `wood_surface`, `grey_accent`, `glass_frame`
+
+**Application code stores:**
+- Mapping from `panel_variant` → CSS classes (`src/lib/collage-variants.ts`)
+- Mapping from `clip_variant` → clip-path CSS
+- Responsive overrides for container min-height
+- Shadow, rounded-corner defaults
+
+**Transform pipeline:**
+```
+DB collage_layers
+  → category.service.ts (fetch + join media)
+  → collage-mapper.ts (enum → CategoryCollageConfig)
+  → CategoryImageCollage (unchanged render component)
+```
+
+This preserves the existing `CategoryCollageConfig` TypeScript interface as the **view model** while the DB holds portable numeric data.
+
+### Seed migration approach
+
+1. Parse current `category-collages.ts` positions manually into percentage values (one-time seed script)
+2. Store variant enums where class strings encode known patterns (e.g. `bg-indigo-950/80 -skew-x-6` → `dark_overlay`)
+
+---
+
+## 7. Storage Architecture
+
+### Buckets
+
+| Bucket | Public read | Admin write | Purpose |
+|--------|-------------|-------------|---------|
+| `media` | Yes | Yes | Published production assets |
+| `uploads` | No | Yes | Draft uploads before publish |
+
+### Path convention
+
 ```
 media/
-├── logo/
-│   └── logo.svg
+├── site/
+│   ├── logo.svg
+│   └── favicon.svg
 ├── hero/
-│   └── desk-setup.webp
+│   ├── background.webp
+│   └── phone.webp
 ├── features/
-│   ├── ai-power.webp
-│   ├── gaming-setup.webp
-│   └── audio-knobs.webp
+│   └── {feature_key}.webp
+├── blocks/
+│   ├── feature-section-bg.webp
+│   └── promo-banner-bg.webp
 ├── categories/
-│   ├── communication/
-│   │   ├── card.webp
-│   │   └── collage-1.webp
-│   ├── entertainment/
-│   └── ...
-├── banner/
-│   └── retro-tech.webp
+│   └── {category_slug}/
+│       ├── card.webp
+│       └── collage/
+│           └── {layer_key}.webp
 └── contact/
-    ├── grid-1.webp
-    └── ...
+    └── grid-{n}.webp
 ```
 
-### Storage Policies
+### Media lifecycle
+
+```
+Admin upload → uploads/{uuid}.webp (private)
+       ↓ review
+Publish → copy/move to media/{path}.webp
+       ↓
+media_assets row created/updated (path, alt, dimensions)
+       ↓
+Content record references media_assets.id
+       ↓
+Public site resolves Storage public URL
+```
+
+### Orphan handling (Phase 3)
+
+- `media_assets` tracks `referenced_by` via FK constraints — deleting content nullifies or blocks
+- Periodic admin job: list Storage objects with no DB reference
+- Do not auto-delete on content removal without admin confirmation
+
+---
+
+## 8. Data Access Layer
+
+Components must not contain raw Supabase queries.
+
+### Proposed structure
+
+```
+src/
+├── lib/
+│   ├── supabase.ts              # Client init (Phase 2B)
+│   ├── collage-variants.ts      # panel/clip enum → CSS (app config)
+│   └── collage-mapper.ts        # DB rows → CategoryCollageConfig
+├── services/
+│   ├── site-content.service.ts  # site_settings + social_links
+│   ├── homepage.service.ts      # features + content_blocks
+│   └── category.service.ts      # categories + pills + collages
+├── repositories/                # Optional thin Supabase query layer
+│   ├── site.repository.ts
+│   ├── homepage.repository.ts
+│   └── category.repository.ts
+└── hooks/
+    ├── useSiteContent.ts
+    ├── useHomepageContent.ts
+    └── useCategory.ts
+```
+
+### Service pattern
+
+```typescript
+// category.service.ts — conceptual
+export async function getCategoryPage(slug: string): Promise<CategoryPageData | null> {
+  if (!isSupabaseConfigured()) {
+    return getCategoryPageFromStatic(slug)  // Phase 1 fallback during migration
+  }
+  const row = await categoryRepository.findPublishedBySlug(slug)
+  return mapCategoryPageRow(row)
+}
+```
+
+Pages call hooks → hooks call services → services return **domain types** matching existing component props.
+
+### Domain types (unchanged component contracts)
+
+- `SiteSettings` — mirrors current `site-settings.ts`
+- `Feature` — mirrors `features.ts`
+- `Category` — mirrors `category.ts` (add `id` when from DB)
+- `CategoryCollageConfig` — mirrors `collage.ts`
+
+---
+
+## 9. Migration Strategy
+
+```
+Phase 1 static TS/data
+        ↓
+Phase 2B: Supabase project + migrations (this plan)
+        ↓
+Phase 2C: Seed script from static data + upload images to Storage
+        ↓
+Phase 2D: Services + hooks with static fallback toggle
+        ↓
+Phase 2E: Switch env flag to Supabase source; verify visual parity
+        ↓
+Phase 3: Admin dashboard CRUD
+```
+
+**Rules:**
+- Do not rewrite visual components
+- Seed data must reproduce current site exactly
+- Static files remain as fallback until Supabase verified
+- One env flag: `VITE_CONTENT_SOURCE=static|supabase` (optional, for gradual rollout)
+
+---
+
+## 10. Security Model
+
+### Auth
+
+- Supabase Auth, email/password, admin users only
+- Admin role in `app_metadata.role = 'admin'` (never `user_metadata`)
+- No public sign-up endpoint
+
+### RLS summary
+
+| Audience | SELECT | INSERT | UPDATE | DELETE |
+|----------|--------|--------|--------|--------|
+| anon | published content only | no | no | no |
+| authenticated admin | all | yes | yes | yes |
+| service_role | Edge Functions only | — | — | — |
+
+### Storage policies
+
 - Public SELECT on `media` bucket
-- INSERT/UPDATE/DELETE restricted to authenticated admins
-- Storage upsert requires INSERT + SELECT + UPDATE policies
+- Admin INSERT/UPDATE/DELETE on `media` and `uploads`
+- Upsert requires INSERT + SELECT + UPDATE policies
+
+### Frontend
+
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` only
+- **Never** expose `SUPABASE_SERVICE_ROLE_KEY` in Vite env
+
+See [DATABASE_PLAN.md](./DATABASE_PLAN.md) §7 for full RLS policy list.
 
 ---
 
-## 8. Content Versioning & Publishing
+## 11. Caching & Performance
 
-### Phase 2 (simple)
-- `published` boolean on content tables
-- Edits are immediately live when `published = true`
-- No draft preview
+### Read pattern
 
-### Phase 3 (enhanced)
-- `status` enum: `draft`, `published`, `archived`
-- Optional `published_at` timestamp
-- Admin preview mode with `?preview=true` + auth token
+- Homepage: 1 settings query + 1 features query + 1 categories query (or single RPC/view)
+- Category page: 1 category query with nested pills + collage layers + media joins
+- Writes: rare (admin only)
 
----
+### Recommendations (minimal)
 
-## 9. Caching Strategy
+| Strategy | Recommendation |
+|----------|----------------|
+| Client cache | `@tanstack/react-query` with `staleTime: 5 min` |
+| Homepage fetch | Single Supabase RPC `get_homepage_content()` returning JSON |
+| Category fetch | Single RPC `get_category_page(slug)` with nested joins |
+| N+1 avoidance | Use Postgres joins or RPC — never per-layer fetch in loop |
+| Images | Storage public URLs; long CDN cache; include content hash in filename on upload |
+| Bundle | Remove static image imports once Storage URLs verified |
 
-| Layer | Strategy |
-|-------|----------|
-| **Phase 1 (static)** | No caching needed — data in JS bundles |
-| **Phase 2 (CMS)** | React Query or SWR with stale-while-revalidate |
-| **CDN** | Cache Storage assets with long TTL; versioned filenames |
-| **Build-time** | Optional: fetch CMS data at build for SSG hybrid |
-
-**Recommendation:** Start with client-side fetching + React Query (`staleTime: 5min`). Evaluate SSG pre-rendering if SEO becomes critical.
+Do not add Redis, edge caching, or SSG until traffic warrants it.
 
 ---
 
-## 10. Admin Dashboard (Phase 3)
+## 12. Environment Variables
 
-### Scope
-Minimal admin UI — not a full CMS like Strapi. Built as protected routes in the same React app or a separate `/admin` SPA.
-
-### Admin Sections
-1. **Site Settings** — tagline, contact info, social links
-2. **Hero** — headline, CTA text, hero image
-3. **Features** — CRUD feature cards
-4. **Categories** — CRUD categories + sub-categories + images
-5. **Content Blocks** — banner text, about section
-6. **Media Library** — browse/upload Storage assets
-7. **Products/Reviews** — Phase 3+
-8. **Contact Submissions** — read-only inbox
-
-### Tech Options
-- Same React app with `/admin/*` routes (simpler)
-- Separate admin app (better isolation, more effort)
-
-**Recommendation:** Same app, protected admin routes. Keeps one codebase.
-
----
-
-## 11. Migration Path (Static → CMS)
-
-```
-Phase 1                          Phase 2                         Phase 3
-────────                         ───────                         ───────
-src/data/categories.ts     →     Supabase categories table  →    Admin CRUD UI
-src/data/features.ts       →     Supabase features table    →    Admin CRUD UI
-src/data/site-settings.ts  →     Supabase site_settings     →    Admin settings page
-src/assets/images/*        →     Supabase Storage/media/*   →    Media library UI
-
-Hooks:
-useCategories() reads from   →   reads from Supabase       →   same + admin mutations
-static import
-```
-
-**Key principle:** TypeScript interfaces stay the same. Only the data source changes in hooks.
-
----
-
-## 12. External Integrations (Future)
-
-| Integration | Purpose | Phase |
-|-------------|---------|-------|
-| Email (Resend/SendGrid) | Contact form notifications | Phase 3 |
-| Analytics (Plausible/GA) | Traffic tracking | Phase 4 |
-| Search (Postgres FTS) | Product/review search | Phase 3 |
-
----
-
-## 13. Security Checklist
-
-- [ ] RLS enabled on every public schema table
-- [ ] Admin role in `app_metadata`, never `user_metadata`
-- [ ] Anon key only in frontend env vars
-- [ ] Service role key only in Edge Functions / CI
-- [ ] Storage policies restrict write to admins
-- [ ] Contact form protected by rate limiting (Edge Function)
-- [ ] Input validation on all admin forms
-- [ ] No SQL injection (Supabase client parameterized queries)
-- [ ] CORS configured on Storage bucket
-
----
-
-## 14. Environment Configuration
+### Browser-safe (Vite)
 
 ```bash
-# .env.example
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
+VITE_CONTENT_SOURCE=supabase   # optional: static | supabase
+```
 
-# Supabase (Phase 2+)
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+### Server / CI only (never in SPA)
 
-# Server-side only (Edge Functions, never in SPA)
-# SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```bash
+SUPABASE_SERVICE_ROLE_KEY=eyJ...   # Edge Functions, seed scripts, CI migrations
+```
+
+### Local development
+
+```bash
+# .env.local (gitignored)
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
 ```
 
 ---
 
-## 15. What NOT to Build Yet
+## 13. Future CMS Capabilities (schema-ready)
 
-- Admin dashboard UI
-- Supabase project / migrations
-- Edge Functions
-- Contact form backend
-- Product/review CRUD
-- User registration
-- Real-time subscriptions
-- Full-text search
+| Capability | Phase | Schema support |
+|------------|-------|----------------|
+| Edit homepage copy | 3 | `site_settings`, `features`, `content_blocks` |
+| Edit categories | 3 | `categories`, `category_pills` |
+| Manage collage | 3 | `category_collages`, `collage_layers` |
+| Upload images | 3 | `media_assets` + Storage |
+| Publish/unpublish | 2 | `published` boolean on all content tables |
+| Admin login | 3 | Supabase Auth |
+| Contact form inbox | 4 | `contact_submissions` |
+| Products/reviews | 4 | `products`, `reviews` |
+| Sub-category routes | 4 | `category_pills` already has slugs |
 
-These are documented for planning purposes only.
+---
+
+## 14. Unresolved Decisions
+
+| Decision | Options | Recommendation |
+|----------|---------|----------------|
+| Hero in separate table vs site_settings | split / merge | **Merge** — matches Phase 1 single config file |
+| Contact grid: 1 vs 8 images | composite / individual | **Schema supports 8**; seed with 1 composite initially |
+| Collage responsive overrides | DB jsonb / code | **Code** for Phase 2; jsonb overrides in Phase 3 if needed |
+| Admin app location | same SPA / separate | **Same SPA** `/admin/*` routes (Phase 3) |
+| React Query vs SWR | either | **React Query** — better nested cache invalidation |
+| Seed script language | SQL / TypeScript | **TypeScript** — can import static data directly |
+
+---
+
+## 15. What NOT to Build in Phase 2A
+
+- [x] Architecture documentation (this file)
+- [ ] Supabase project
+- [ ] npm install `@supabase/supabase-js`
+- [ ] Migrations
+- [ ] Seed scripts
+- [ ] Service layer implementation
+- [ ] Admin UI
+- [ ] Auth UI
+- [ ] Replace static data in components
+
+**Next:** Phase 2B — Supabase project setup + migrations + seed.

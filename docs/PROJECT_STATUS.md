@@ -1,73 +1,67 @@
 # Project Status — GameGear Nexus
 
-> Last updated: Phase 1C completion (2026-09-01)
+> Last updated: Phase 2A completion (2026-09-01)
 
 ---
 
 ## Current Phase
 
-**Phase 1C — Category Page Implementation** (complete)
+**Phase 2A — CMS Architecture & Supabase Planning** (complete)
 
 ---
 
 ## Completed
 
-### Phase 1A
-- [x] React + Vite + TypeScript scaffold
-- [x] Tailwind CSS with Canva-derived design tokens
-- [x] React Router routing skeleton
-- [x] Initial UI primitives and category navigation
-- [x] ESLint + Prettier + documentation
+### Phase 1 — Static Frontend MVP
+- [x] 1A: Project foundation
+- [x] 1B: Homepage implementation
+- [x] 1C: Category page template
 
-### Phase 1B
-- [x] Full homepage (six sections from `1.png`)
-- [x] Homepage image crop pipeline
-
-### Phase 1C
-- [x] Reusable category page template (`CategoryPageContent`)
-- [x] Data-driven collage configuration (`category-collages.ts`)
-- [x] Category-specific image crops (`scripts/crop-category-images.sh`)
-- [x] All six category routes rendering through single template
-- [x] Decorative sub-category pills preserved
-- [x] `CategoryBackNav` preserved
+### Phase 2A
+- [x] Static data inventory audit
+- [x] Content classification (CMS / app config / media)
+- [x] Revised `docs/DATABASE_PLAN.md` (aligned with Phase 1 implementation)
+- [x] Revised `docs/CMS_ARCHITECTURE.md` (collage strategy, data-access layer, migration path)
+- [x] Collage model design (percentages + variant enums, no CSS in DB)
+- [x] Security, storage, caching, and environment documentation
 
 ---
 
 ## In Progress
 
-Nothing — Phase 1 static site MVP complete. Awaiting Phase 2 approval.
+Nothing — awaiting Phase 2B approval.
 
 ---
 
 ## Remaining
 
-### Phase 2 — CMS Integration
-- Supabase project, migrations, seed data, Storage
+### Phase 2B — Supabase Setup & Migrations
+- Create Supabase project
+- Install `@supabase/supabase-js`
+- Write and apply migrations per `DATABASE_PLAN.md`
+- Create Storage buckets + policies
 
-### Phase 3 — Admin & Content Expansion
-- Auth, admin dashboard, sub-category pages, products/reviews
+### Phase 2C — Seed & Storage Migration
+- Upload static images to Storage
+- Seed script from `src/data/*.ts`
+- Convert collage positions to DB percentages
 
-### Phase 4 — Production Hardening
-- Licensed images, performance, E2E tests, deployment
+### Phase 2D — Data Access Layer
+- Services, repositories, hooks
+- Static fallback toggle
+- Visual parity verification
 
----
-
-## Known Issues
-
-| Issue | Severity | Notes |
-|-------|----------|-------|
-| No mobile Canva designs | Medium | Collage stacks on small screens |
-| Collage crops approximate | Medium | Positioning via config; may need refinement |
-| CategoryBackNav not in Canva | Low | Intentional usability addition |
+### Phase 3 — Admin Dashboard
+- Auth, CRUD UI, media library
 
 ---
 
 ## Next Action
 
-**Phase 2 — CMS Integration**
+**Phase 2B — Supabase project setup + migrations**
 
 ---
 
 ## Cursor State
 
-Phase 1C complete — reusable category template with configuration-driven collages for all six Canva designs.
+Phase 2A complete. No source code or dependencies changed. Frontend remains static.
