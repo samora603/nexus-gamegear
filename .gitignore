@@ -24,6 +24,7 @@ npm-debug.log*
 
 # Vite
 *.local
+_vite-scaffold/
 
 # TypeScript
 *.tsbuildinfo
@@ -33,6 +34,9 @@ coverage/
 
 # Supabase local
 .supabase/
+
+# Temporary Canva extractions (run scripts/extract-design-images.sh)
+src/assets/dev/canva-exports/
 
 # Temporary analysis artifacts (not source design assets)
 .design-extract/

@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Canva-derived color tokens (approximate) */
+    --color-purple-900: #2d0b5a;
+    --color-purple-800: #4c1d95;
+    --color-purple-700: #6b21a8;
+    --color-purple-500: #a855f7;
+    --color-indigo-950: #0a041a;
+    --color-cyan-400: #22d3ee;
+    --color-pink-100: #fce7f3;
+    --color-pink-200: #fbcfe8;
+
+    /* Typography — see docs/ENGINEERING.md */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-nexus-indigo-950 font-body text-white antialiased;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

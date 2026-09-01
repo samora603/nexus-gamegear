@@ -2,7 +2,7 @@
 
 Production-ready website for **GameGear Nexus** — a tech review and gadget discovery platform.
 
-> **Status:** Planning phase complete. Implementation not yet started.
+> **Status:** Phase 1A complete — frontend foundation established. UI implementation begins Phase 1B.
 
 ## Documentation
 
@@ -12,18 +12,14 @@ Production-ready website for **GameGear Nexus** — a tech review and gadget dis
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Application structure, routing, deployment |
 | [docs/CMS_ARCHITECTURE.md](docs/CMS_ARCHITECTURE.md) | Supabase CMS content strategy |
 | [docs/DATABASE_PLAN.md](docs/DATABASE_PLAN.md) | Proposed PostgreSQL schema |
-
-## Design Assets
-
-Original Canva exports are preserved in `design/game gear.zip`. Do not modify or delete these files.
-
-## Tech Stack (planned)
-
-- React 19 + Vite + TypeScript
-- Tailwind CSS
-- React Router
-- Supabase (PostgreSQL, Auth, Storage) — CMS phase
+| [docs/ENGINEERING.md](docs/ENGINEERING.md) | Dev commands, conventions, styling |
+| [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Current phase, decisions, next steps |
 
 ## Getting Started
 
-Implementation has not begun. See documentation above and wait for approval before building.
+```bash
+npm install
+npm run dev
+```
+
+See [docs/ENGINEERING.md](docs/ENGINEERING.md) for all commands.
