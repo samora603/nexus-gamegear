@@ -6,6 +6,8 @@ export interface SubCategory {
 export interface Category {
   slug: string
   name: string
+  /** All-caps display title matching Canva designs */
+  displayTitle: string
   cardLabel: string
   cardImage?: string
   designFile: string

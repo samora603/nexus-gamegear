@@ -1,12 +1,12 @@
 # Project Status — GameGear Nexus
 
-> Last updated: Phase 1B completion (2026-09-01)
+> Last updated: Phase 1C completion (2026-09-01)
 
 ---
 
 ## Current Phase
 
-**Phase 1B — Homepage Implementation** (complete)
+**Phase 1C — Category Page Implementation** (complete)
 
 ---
 
@@ -20,28 +20,26 @@
 - [x] ESLint + Prettier + documentation
 
 ### Phase 1B
-- [x] Hero section (brand, tagline, pink panel, VIEW PROPERTIES CTA, phone mockup)
-- [x] Feature card grid + supporting copy section
-- [x] "What we are about" + category card grid (links to category routes)
-- [x] Promotional banner
-- [x] Contact section (`id="contact"`) with phone, email, social icons, photo grid
-- [x] Canva-derived homepage image crops (`scripts/crop-homepage-images.sh`)
-- [x] Data-driven features and site content
+- [x] Full homepage (six sections from `1.png`)
+- [x] Homepage image crop pipeline
+
+### Phase 1C
+- [x] Reusable category page template (`CategoryPageContent`)
+- [x] Data-driven collage configuration (`category-collages.ts`)
+- [x] Category-specific image crops (`scripts/crop-category-images.sh`)
+- [x] All six category routes rendering through single template
+- [x] Decorative sub-category pills preserved
+- [x] `CategoryBackNav` preserved
 
 ---
 
 ## In Progress
 
-Nothing — awaiting Phase 1C approval.
+Nothing — Phase 1 static site MVP complete. Awaiting Phase 2 approval.
 
 ---
 
 ## Remaining
-
-### Phase 1C — Category Page Implementation
-- Full category page layout matching designs 2–7
-- Image collage component with layering/transparency
-- Remove dev placeholders on category pages
 
 ### Phase 2 — CMS Integration
 - Supabase project, migrations, seed data, Storage
@@ -49,51 +47,27 @@ Nothing — awaiting Phase 1C approval.
 ### Phase 3 — Admin & Content Expansion
 - Auth, admin dashboard, sub-category pages, products/reviews
 
+### Phase 4 — Production Hardening
+- Licensed images, performance, E2E tests, deployment
+
 ---
 
 ## Known Issues
 
 | Issue | Severity | Notes |
 |-------|----------|-------|
-| No mobile Canva designs | Medium | Responsive behavior inferred; requires visual QA |
-| Hero CTA "VIEW PROPERTIES" | Low | Preserved; scrolls to `#explore-solutions`; destination TBD |
-| Canva-derived images not production-ready | Medium | Must replace before launch |
+| No mobile Canva designs | Medium | Collage stacks on small screens |
+| Collage crops approximate | Medium | Positioning via config; may need refinement |
 | CategoryBackNav not in Canva | Low | Intentional usability addition |
-| About body copy approximate | Low | Exact Canva paragraph not OCR'd; meaning preserved |
-| Social links are `#` placeholders | Low | URLs not in design |
-| Contact grid uses single cropped image | Low | Design shows 2×4 grid; dev crop used for fidelity |
-
----
-
-## Decisions
-
-1. **Preserve `VIEW PROPERTIES` CTA** — scrolls to `#explore-solutions`; no invented destination.
-2. **Minimal category navigation** — `CategoryBackNav` on category pages.
-3. **Sub-category pills are non-navigational** — decorative only in Phase 1.
-4. **No standalone `/contact` page** — `/contact` redirects to `/#contact`.
-5. **Temporary Canva imagery** — cropped to `src/assets/images/home/` for build; documented as dev assets.
 
 ---
 
 ## Next Action
 
-**Phase 1C — Category Page Implementation**
-
-Implement full category page template matching designs 2–7 with image collage layouts.
+**Phase 2 — CMS Integration**
 
 ---
 
 ## Cursor State
 
-### Task completed
-Phase 1B — Homepage Implementation
-
-### Outcome
-- Full homepage with six sections from `1.png`
-- Reusable home components in `src/components/home/`
-- Homepage image crop pipeline established
-- Lint and build passing
-
-### Not done (by design)
-- Category page Canva UI
-- Supabase / CMS / auth
+Phase 1C complete — reusable category template with configuration-driven collages for all six Canva designs.

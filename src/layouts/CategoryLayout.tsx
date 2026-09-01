@@ -6,15 +6,12 @@ interface CategoryLayoutProps {
   children: ReactNode
 }
 
-/**
- * Minimal category page shell with optional back navigation.
- * Full Canva composition is implemented in Phase 1C.
- */
+/** Category page shell — purple gradient with minimal back navigation. */
 export function CategoryLayout({ children }: CategoryLayoutProps) {
   return (
-    <GradientBackground variant="category" className="min-h-screen">
-      <div className="mx-auto min-h-screen max-w-design px-4 py-6 sm:px-6 lg:px-8">
-        <CategoryBackNav />
+    <GradientBackground variant="category" className="min-h-screen overflow-x-hidden">
+      <div className="mx-auto min-h-screen max-w-design px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <CategoryBackNav className="mb-6 lg:mb-8" />
         {children}
       </div>
     </GradientBackground>

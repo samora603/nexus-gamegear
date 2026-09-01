@@ -14,6 +14,7 @@ export const categories: Category[] = [
   {
     slug: 'communication-gadgets',
     name: 'Communication Gadgets',
+    displayTitle: 'COMMUNICATION GADGETS',
     cardLabel: 'Communication gadgets',
     cardImage: categoryCommunication,
     designFile: '2.png',
@@ -26,6 +27,7 @@ export const categories: Category[] = [
   {
     slug: 'entertainment-gadgets',
     name: 'Entertainment Gadgets',
+    displayTitle: 'ENTERTAINMENT GADGETS',
     cardLabel: 'Entertainment gadgets',
     cardImage: categoryEntertainment,
     designFile: '3.png',
@@ -39,6 +41,7 @@ export const categories: Category[] = [
   {
     slug: 'computer-gadgets',
     name: 'Computer Gadgets',
+    displayTitle: 'COMPUTER GADGETS',
     cardLabel: 'Computer gadgets',
     cardImage: categoryComputer,
     designFile: '4.png',
@@ -51,6 +54,7 @@ export const categories: Category[] = [
   {
     slug: 'wearable-gadgets',
     name: 'Wearable Gadgets',
+    displayTitle: 'WEARABLE GADGETS',
     cardLabel: 'Wearable gadgets',
     cardImage: categoryWearable,
     designFile: '5.png',
@@ -63,6 +67,7 @@ export const categories: Category[] = [
   {
     slug: 'photography-gadgets',
     name: 'Photography Gadgets',
+    displayTitle: 'PHOTOGRAPHY GADGETS',
     cardLabel: 'Photography gadgets',
     cardImage: categoryPhotography,
     designFile: '6.png',
@@ -75,6 +80,7 @@ export const categories: Category[] = [
   {
     slug: 'power-charging-gadgets',
     name: 'Power & Charging Gadgets',
+    displayTitle: 'POWER AND CHARGING GADGETS',
     cardLabel: 'Power and charging gadgets',
     cardImage: categoryPower,
     designFile: '7.png',
