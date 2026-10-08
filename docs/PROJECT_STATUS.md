@@ -1,18 +1,18 @@
 # Project Status — GameGear Nexus
 
-> Last updated: admin authentication foundation (2026-10-08)
+> Last updated: authenticated CMS admin (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Phase 2F — Supabase Auth and admin authorization**
+**Phase 2G — authenticated CMS admin**
 
-`/admin/login` signs in with Supabase email and password. `/admin` is an authorization shell with no CMS editing. Admin UI access uses `app_metadata.role === 'admin'`. Database writes still depend on `is_admin()` and RLS.
+`/admin` is the site-owner CMS: dashboard counts, blog drafts and publishing, and media uploads into the public `media` bucket. Writes use the signed-in Supabase browser client. `is_admin()` and RLS still decide whether a write succeeds.
 
-The homepage remains static. Category pages and the public blog are unchanged.
+`auth.users` is still empty, so sign-in, publish, and upload were not exercised in the browser. Create the owner in the Supabase dashboard and set App Metadata, not User Metadata, to `{ "role": "admin" }`. Do not put the password in the repository.
 
-No Auth user exists yet. Create the owner in the Supabase dashboard, then set App Metadata to `{ "role": "admin" }`. Do not put the password in the repository.
+The homepage remains static. Category pages and the public blog read path are unchanged.
 
 ---
 
@@ -67,34 +67,43 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [x] `auth.users` count is 0. No owner account was created by this change
 - [x] Logged-out browser check: `/admin` redirects to `/admin/login?next=%2Fadmin` and does not show the admin shell
 
+### Phase 2G CMS admin
+- [x] Dashboard, blog list/editor, and media library under `/admin`
+- [x] Posts use the existing `site-owner` author, draft/published constraint, and `featured_image_id`
+- [x] Uploads go to the public `media` bucket under `admin/<uuid>.<ext>`
+- [x] Referenced media is blocked before delete
+- [x] Anonymous blog, media, and storage writes were denied. The seed draft title was unchanged
+- [ ] Owner sign-in and live create/publish/upload were not run. No Auth user exists
+
 ---
 
 ## In Progress
 
-The owner Auth account still has to be created in the Supabase dashboard before an admin can sign in.
+The CMS screens are in the app. They stay unused until the owner Auth user exists.
 
 ---
 
 ## Remaining
 
 - Create the owner user and set App Metadata `role` to `admin`
-- Phase 2G authenticated CMS admin
-- Admin write tests (not run; no admin user exists)
+- Sign in and confirm draft, publish, unpublish, delete, and media upload in the browser
+- Admin JWT write tests (not run; no admin user exists)
+- Authenticated non-admin write tests (no second user was created)
 - Blog categories/tags were not added. Product categories stay separate
 
 ---
 
 ## Not done
 
-- Admin content editing
 - Multi-author management
 - Supabase-backed homepage
+- Category, feature, and site-settings editors
 
 ---
 
 ## Next Action
 
-Phase 2G is the authenticated CMS admin. Do not start it until the owner Auth user exists and `app_metadata.role` is `admin`.
+Create the owner in the Supabase dashboard, then confirm the CMS mutations with that session. After that, the next content area is the homepage.
 
 ---
 
@@ -111,4 +120,4 @@ Phase 2G is the authenticated CMS admin. Do not start it until the owner Auth us
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. Admin sign-in exists, and no Auth user has been created. The homepage remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. The admin CMS is implemented, and no Auth user has been created. The homepage remains static.

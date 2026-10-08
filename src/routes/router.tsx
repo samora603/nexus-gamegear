@@ -1,8 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PageLayout } from '@/layouts/PageLayout'
 import {
+  AdminBlogEditorPage,
+  AdminBlogListPage,
+  AdminDashboardPage,
+  AdminLayout,
   AdminLoginPage,
-  AdminShellPage,
+  AdminMediaPage,
   BlogIndexPage,
   BlogPostPage,
   CategoryPage,
@@ -36,7 +40,14 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin',
-        element: <AdminShellPage />,
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: 'blog', element: <AdminBlogListPage /> },
+          { path: 'blog/new', element: <AdminBlogEditorPage /> },
+          { path: 'blog/:id', element: <AdminBlogEditorPage /> },
+          { path: 'media', element: <AdminMediaPage /> },
+        ],
       },
       {
         path: ':categorySlug',

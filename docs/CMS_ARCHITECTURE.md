@@ -510,7 +510,7 @@ VITE_SUPABASE_ANON_KEY=...
 There is no existing blog screen in the Canva pages. `/blog` and `/blog/:slug` use the category gradient, display type, and back navigation.
 
 - One `blog_authors` row, key `site-owner`, display name taken from the site name. Posts reference that row. There is no author admin.
-- `blog_posts.status` is `draft` or `published`. A published row must have `published_at`. Anonymous SELECT allows only published rows whose `published_at` is not in the future. There is no public INSERT, UPDATE, or DELETE. Admin writes use the existing `is_admin()` policy and are not wired to a UI yet.
+- `blog_posts.status` is `draft` or `published`. A published row must have `published_at`. Anonymous SELECT allows only published rows whose `published_at` is not in the future. There is no public INSERT, UPDATE, or DELETE. Admin writes use the existing `is_admin()` policy through the CMS.
 - Body copy is plain text paragraphs. React renders text nodes. Tailwind classes are not stored.
 - `featured_image_id` points at `media_assets`. The public URL comes from the existing media resolver. A missing image does not block the article.
 - SEO title and description fall back to the title and excerpt.
@@ -527,4 +527,21 @@ Phase 2F adds sign-in only. The future CMS admin (Phase 2G) should sit behind `/
 - Sign-in uses `signInWithPassword`. The session is the Supabase Auth session. Admin UI state reads `user.app_metadata.role === 'admin'`.
 - `public.is_admin()` still reads `auth.jwt() -> app_metadata ->> role`. A matching frontend flag does not grant database writes.
 - Create the owner in the Supabase dashboard. Set App Metadata, not User Metadata, to `{ "role": "admin" }`. Do not store the password in git.
-- `/admin/login` is public. Other `/admin` paths redirect signed-out visitors to the login page with an internal `next` path. Signed-in non-admins see an unauthorized state. There is no CMS form on the shell page.
+- `/admin/login` is public. Other `/admin` paths redirect signed-out visitors to the login page with an internal `next` path. Signed-in non-admins see an unauthorized state.
+
+---
+
+## 18. Authenticated CMS
+
+Phase 2G replaces the authorization shell with dashboard, blog, and media screens. There is still one owner. The CMS does not manage users, roles, or authors.
+
+- Routes: `/admin`, `/admin/blog`, `/admin/blog/new`, `/admin/blog/:id`, `/admin/media`.
+- Blog posts always use the `site-owner` author row. If that row is missing, the editor shows a configuration error and does not insert another author.
+- Save draft sets `status = draft` and `published_at = null`. Publish sets `status = published` and keeps an existing `published_at`, or stamps the current time. Return to draft clears `published_at`.
+- Slugs are normalized to lowercase hyphenated text. The unique constraint on `blog_posts.slug` rejects duplicates.
+- Article content stays plain text. The public page still renders text nodes.
+- SEO title and description are optional. The public mapper still falls back to title and excerpt.
+- Featured images are `featured_image_id` values chosen from `media_assets`.
+- Uploads validate JPEG, PNG, WebP, GIF, and SVG files up to 8 MB, store them at `admin/<uuid>.<ext>` in the public `media` bucket, then insert `media_assets`. The private `uploads` bucket is unchanged.
+- Delete checks features, collage layers, contact images, categories, content blocks, site settings, and blog posts before removing a media row. A referenced file is left in place.
+- Mutations use `getSupabaseClient()` with the Auth session. `public.is_admin()` remains the database boundary.
