@@ -64,17 +64,11 @@ const cmsCategory = {
   },
 }
 
-test('communication and entertainment select CMS; other routes stay static', () => {
+test('three category canaries select CMS; other routes stay static', () => {
   assert.equal(resolveCategorySource('communication-gadgets'), 'cms')
   assert.equal(resolveCategorySource('entertainment-gadgets'), 'cms')
-  for (const slug of [
-    'computer-gadgets',
-    'wearable-gadgets',
-    'photography-gadgets',
-    'power-charging-gadgets',
-    '',
-    '/',
-  ]) {
+  assert.equal(resolveCategorySource('computer-gadgets'), 'cms')
+  for (const slug of ['wearable-gadgets', 'photography-gadgets', 'power-charging-gadgets', '', '/']) {
     assert.equal(resolveCategorySource(slug), 'static')
   }
 })
@@ -189,6 +183,115 @@ test('an entertainment CMS failure keeps the static collage', () => {
   assert.equal(result.source, 'static-fallback')
   assert.equal(result.view.collage.images[1].className.includes('rounded-glass'), true)
   assert.equal(result.view.collage.images[0].src, '/local/vintage.webp')
+})
+
+const computerStatic = {
+  category: {
+    slug: 'computer-gadgets',
+    name: 'Computer Gadgets',
+    displayTitle: 'STATIC COMPUTER',
+    cardLabel: 'Computer gadgets',
+    designFile: '4.png',
+    subCategories: [],
+  },
+  collage: {
+    containerClassName: 'min-h-[22rem]',
+    images: [
+      {
+        id: 'desk-setup',
+        src: '/local/desk.webp',
+        alt: 'Local desk',
+        className: 'absolute left-[14%] top-[2%] z-10 w-[18%] shadow-collage',
+      },
+      {
+        id: 'printer-main',
+        src: '/local/printer.webp',
+        alt: 'Local printer',
+        className:
+          'absolute left-[28%] top-[8%] z-30 w-[50%] [clip-path:polygon(0_0,82%_0,100%_14%,100%_100%,0_100%)]',
+      },
+      {
+        id: 'floor-printer',
+        src: '/local/floor.webp',
+        alt: 'Local floor printer',
+        className: 'absolute bottom-[0%] left-[36%] z-15 w-[30%] opacity-90',
+      },
+      {
+        id: 'desktop-setup',
+        src: '/local/desktop.webp',
+        alt: 'Local desktop',
+        className: 'absolute bottom-[6%] right-[2%] z-20 w-[34%]',
+      },
+    ],
+  },
+}
+
+const computerCms = {
+  slug: 'computer-gadgets',
+  name: 'Computer Gadgets',
+  displayTitle: 'COMPUTER GADGETS',
+  cardLabel: 'Computer gadgets',
+  offsetCard: false,
+  pills: [
+    { slug: 'laptops', name: 'Laptops' },
+    { slug: 'desktops', name: 'Desktops' },
+    { slug: 'printers', name: 'Printers' },
+  ],
+  collage: {
+    overlayPrimary: null,
+    overlaySecondary: null,
+    layers: [
+      {
+        key: 'desktop-setup',
+        type: 'image',
+        storagePath: 'categories/computer-gadgets/desktop-setup.webp',
+        alt: 'Remote desktop',
+      },
+      {
+        key: 'printer-main',
+        type: 'image',
+        storagePath: 'categories/computer-gadgets/printer-main.webp',
+        alt: 'Remote printer',
+      },
+      {
+        key: 'floor-printer',
+        type: 'image',
+        storagePath: 'categories/computer-gadgets/floor-printer.webp',
+        alt: 'Remote floor printer',
+      },
+      {
+        key: 'desk-setup',
+        type: 'image',
+        storagePath: 'categories/computer-gadgets/desk-setup.webp',
+        alt: 'Remote desk',
+      },
+    ],
+  },
+}
+
+test('computer keeps collage CSS, clip path, and static image order', () => {
+  const merged = mergeCanaryCategory(computerStatic, computerCms, (path) => `https://cdn.test/media/${path}`)
+  assert.equal(merged.category.displayTitle, 'COMPUTER GADGETS')
+  assert.equal(merged.category.designFile, '4.png')
+  assert.deepEqual(
+    merged.collage.images.map((image) => image.id),
+    ['desk-setup', 'printer-main', 'floor-printer', 'desktop-setup'],
+  )
+  assert.equal(
+    merged.collage.images[0].src,
+    'https://cdn.test/media/categories/computer-gadgets/desk-setup.webp',
+  )
+  assert.equal(merged.collage.images[1].className, computerStatic.collage.images[1].className)
+  assert.equal(merged.collage.images[1].className.includes('clip-path'), true)
+  assert.equal(merged.collage.overlayText, undefined)
+  assert.equal(computerStatic.collage.images[0].src, '/local/desk.webp')
+})
+
+test('a computer CMS failure keeps the static collage', () => {
+  const result = presentCanary(computerStatic, { ok: false })
+  assert.equal(result.source, 'static-fallback')
+  assert.equal(result.view.collage.images[1].src, '/local/printer.webp')
+  assert.equal(result.view.collage.images[1].className.includes('clip-path'), true)
 })
 
 test('an image without presentation CSS fails closed', () => {

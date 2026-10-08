@@ -4,7 +4,11 @@
  */
 import { CmsError } from './read-cms.mjs'
 
-export const CMS_CANARY_SLUGS = ['communication-gadgets', 'entertainment-gadgets']
+export const CMS_CANARY_SLUGS = [
+  'communication-gadgets',
+  'entertainment-gadgets',
+  'computer-gadgets',
+]
 
 export function resolveCategorySource(slug) {
   return CMS_CANARY_SLUGS.includes(slug) ? 'cms' : 'static'
