@@ -1,16 +1,16 @@
 # Project Status — GameGear Nexus
 
-> Last updated: category CMS integration complete (2026-10-08)
+> Last updated: single-author blog CMS (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Category CMS integration — complete**
+**Phase 2E — single-author blog foundation**
 
-All six category pages load published CMS copy, pills, and public media URLs. Collage CSS stays in `src/data/category-collages.ts`. A CMS failure falls back to that category’s static data.
+Public routes `/blog` and `/blog/:slug` read published posts only. The site owner is one `blog_authors` row (`site-owner`, display name GameGear Nexus). Authentication and the admin editor are not built.
 
-The homepage remains static. The blog and admin CMS are not started.
+The homepage remains static. All six category pages remain CMS-backed.
 
 ---
 
@@ -22,7 +22,7 @@ The homepage remains static. The blog and admin CMS are not started.
 
 ### Remote schema
 - [x] Project `pdqwaftiflaaelwzzypp` (`https://pdqwaftiflaaelwzzypp.supabase.co`)
-- [x] Migrations `20250901000000` through `20250901000013` applied
+- [x] Migrations `20250901000000` through `20250901000014` applied
 - [x] RLS on all 10 application tables
 - [x] Buckets `media` (public) and `uploads` (private)
 
@@ -49,20 +49,28 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [x] Browser check: a blocked CMS request rendered `static-fallback` with local images for all six categories, then fresh loads returned to CMS
 - [x] `npm run test:cms` (20 passed), `npm run cms:parity` (`MATCH`), `npm run lint`, and `npm run build` passed
 
+### Single-author blog
+- [x] `blog_authors` and `blog_posts` with RLS: anonymous clients can select published posts only
+- [x] One site-owner author. No author management and no authentication
+- [x] Article body is plain text. Featured images use `media_assets` and the public media URL resolver
+- [x] `/blog` and `/blog/:slug` are public. A CMS failure shows an unavailable message and does not invent posts
+- [x] The only seeded post is the unpublished `development-seed-draft`. Anonymous reads return no rows
+- [x] Browser check: `/blog` shows “No published articles yet.” The draft slug shows the existing not-found page
+- [x] Browser check: `/`, `/communication-gadgets`, and `/computer-gadgets` still behave as before
+
 ---
 
 ## In Progress
 
-Nothing in the category pages. The homepage remains static.
+Nothing on the public category pages. Blog editing waits for authentication.
 
 ---
 
 ## Remaining
 
-- Blog / content-management layer
-- Authentication and admin role assignment
-- CMS dashboard
+- Authentication and the site-owner CMS/admin interface
 - Admin write tests (not run; no admin user was created)
+- Blog categories/tags were not added. Product categories stay separate
 
 ---
 
@@ -70,14 +78,14 @@ Nothing in the category pages. The homepage remains static.
 
 - Authentication UI
 - Admin dashboard
-- Blog CMS
+- Multi-author management
 - Supabase-backed homepage
 
 ---
 
 ## Next Action
 
-Begin the blog CMS phase. Leave the homepage on `src/data/*`.
+Implement authentication and the authenticated CMS/admin interface for the site owner. Do not add multi-author management unless the requirements change.
 
 ---
 
@@ -94,4 +102,4 @@ Begin the blog CMS phase. Leave the homepage on `src/data/*`.
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. All six category pages are CMS-backed. The homepage remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. The homepage remains static.

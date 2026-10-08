@@ -502,3 +502,18 @@ VITE_SUPABASE_ANON_KEY=...
 - [ ] Replace static data in components
 
 **Next:** Phase 2B — Supabase project setup + migrations + seed.
+
+---
+
+## 16. Single-author blog
+
+There is no existing blog screen in the Canva pages. `/blog` and `/blog/:slug` use the category gradient, display type, and back navigation.
+
+- One `blog_authors` row, key `site-owner`, display name taken from the site name. Posts reference that row. There is no author admin.
+- `blog_posts.status` is `draft` or `published`. A published row must have `published_at`. Anonymous SELECT allows only published rows whose `published_at` is not in the future. There is no public INSERT, UPDATE, or DELETE. Admin writes use the existing `is_admin()` policy and are not wired to a UI yet.
+- Body copy is plain text paragraphs. React renders text nodes. Tailwind classes are not stored.
+- `featured_image_id` points at `media_assets`. The public URL comes from the existing media resolver. A missing image does not block the article.
+- SEO title and description fall back to the title and excerpt.
+- Product categories are not reused as blog tags.
+- The migration seeds one unpublished draft, `development-seed-draft`. It is not production content. `npm run seed:cms` upserts the same draft on `slug`.
+- A failed blog read shows an unavailable message. It does not substitute invented articles.

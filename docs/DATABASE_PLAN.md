@@ -674,7 +674,7 @@ Retained from original plan for Phase 4 expansion. Not required for Phase 2 CMS 
 
 - `products` — FK to `categories`, optional FK to `category_pills`
 - `reviews` — FK to `products`
-- `articles` — standalone blog/insights
+- `articles` — superseded for the public journal by `blog_posts` and `blog_authors` in `20250901000014_create_blog.sql`. That migration is single-author: one `site-owner` row, draft/published status, optional `media_assets` featured image, and anonymous SELECT of published posts only.
 - `contact_submissions` — INSERT via Edge Function only; no public SELECT
 
 </details>

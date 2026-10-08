@@ -1002,6 +1002,33 @@ async function main() {
     await must(supabase.from('contact_grid_images').insert(contactPayload), 'insert contact_grid_images')
   }
 
+  const author = await must(
+    supabase
+      .from('blog_authors')
+      .upsert({ key: 'site-owner', display_name: 'GameGear Nexus' }, { onConflict: 'key' })
+      .select('id')
+      .single(),
+    'upsert blog author',
+  )
+  await must(
+    supabase.from('blog_posts').upsert(
+      {
+        author_id: author.id,
+        title: 'Development seed draft',
+        slug: 'development-seed-draft',
+        excerpt: 'Unpublished structural test data. This is not a production article.',
+        content: 'Development seed draft. This row stays unpublished so anonymous clients cannot read it.',
+        status: 'draft',
+        published_at: null,
+        featured_image_id: null,
+        seo_title: null,
+        seo_description: null,
+      },
+      { onConflict: 'slug' },
+    ),
+    'upsert development blog draft',
+  )
+
   console.log(`Seed complete. Media objects: ${mediaFiles.length}. Layout notes: ${notes.length}`)
   for (const note of notes) console.log(`NOTE ${note}`)
 }
