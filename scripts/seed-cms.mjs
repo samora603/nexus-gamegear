@@ -1006,7 +1006,98 @@ async function main() {
   for (const note of notes) console.log(`NOTE ${note}`)
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error)
-  process.exit(1)
-})
+export function buildLocalSemanticModel() {
+  validateAgainstSource()
+  const mediaFiles = collectMedia()
+  const { rows } = buildLayers(new Set(mediaFiles.map((file) => file.storagePath)))
+  const layersBySlug = new Map()
+  for (const layer of rows) {
+    const list = layersBySlug.get(layer.slug) ?? []
+    list.push({
+      key: layer.layer_key,
+      type: layer.layer_type,
+      storagePath: layer.mediaPath,
+      alt: layer.alt_text,
+      panelVariant: layer.panel_variant,
+      clipVariant: layer.clip_variant,
+      posLeftPct: layer.pos_left_pct,
+      posTopPct: layer.pos_top_pct,
+      widthPct: layer.width_pct,
+      heightPct: layer.height_pct,
+      zIndex: layer.z_index,
+      rotationDeg: layer.rotation_deg,
+      opacity: layer.opacity,
+      sortOrder: layer.sort_order,
+    })
+    layersBySlug.set(layer.slug, list)
+  }
+
+  return {
+    site: {
+      siteName: siteSettings.site_name,
+      tagline: siteSettings.tagline,
+      heroHeadline: siteSettings.hero_headline,
+      heroCtaText: siteSettings.hero_cta_text,
+      heroCtaHref: siteSettings.hero_cta_href,
+      aboutHeading: siteSettings.about_heading,
+      aboutBody: siteSettings.about_body,
+      exploreHeading: siteSettings.explore_heading,
+      promoBannerText: siteSettings.promo_banner_text,
+      contactHeading: siteSettings.contact_heading,
+      contactPhone: siteSettings.contact_phone,
+      contactEmail: siteSettings.contact_email,
+      heroBackgroundPath: 'home/hero-background.webp',
+      heroPhonePath: 'home/hero-phone.webp',
+    },
+    socialLinks: socialLinks.map((link) => ({
+      platform: link.platform,
+      label: link.label,
+      href: link.url,
+    })),
+    features: features.map((feature) => ({
+      id: feature.key,
+      title: feature.title,
+      description: feature.description,
+      imageAlt: feature.imageAlt,
+      storagePath: `home/${feature.file}`,
+    })),
+    contentBlocks: [
+      { key: 'feature_section_bg', body: null, storagePath: 'home/feature-section-bg.webp' },
+      { key: 'promo_banner_bg', body: null, storagePath: 'home/promo-banner-bg.webp' },
+    ],
+    contactImages: [
+      {
+        alt: 'Collage of tech product photography including cameras, headphones, and gadgets',
+        storagePath: 'home/contact-grid.webp',
+        sortOrder: 0,
+      },
+    ],
+    mediaPaths: mediaFiles.map((file) => file.storagePath).sort(),
+    categories: categories.map((category) => {
+      const collage = collages[category.slug]
+      return {
+        slug: category.slug,
+        name: category.name,
+        displayTitle: category.displayTitle,
+        cardLabel: category.cardLabel,
+        offsetCard: category.offsetCard,
+        cardPath: `home/${category.cardFile}`,
+        pills: category.pills.map((pill) => ({ slug: pill.slug, name: pill.label })),
+        collage: {
+          containerVariant: 'default',
+          overlayPrimary: collage.overlayPrimary ?? null,
+          overlaySecondary: collage.overlaySecondary ?? null,
+          layers: layersBySlug.get(category.slug) ?? [],
+        },
+      }
+    }),
+  }
+}
+
+const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+if (invokedDirectly) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error)
+    process.exit(1)
+  })
+}

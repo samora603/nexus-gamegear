@@ -1,14 +1,14 @@
 # Project Status — GameGear Nexus
 
-> Last updated: CMS seed (2026-10-08)
+> Last updated: read-only CMS mapper (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Frontend data layer — next**
+**Phase 2C — read-only CMS mapper**
 
-The static frontend is unchanged and still reads `src/data/*`. The remote database now holds that same content.
+`src/lib/cms/` can load published Supabase rows and map them to a semantic snapshot. Pages still render only from `src/data/*`. Switching the React app to this mapper is deferred.
 
 ---
 
@@ -36,18 +36,22 @@ The static frontend is unchanged and still reads `src/data/*`. The remote databa
 
 The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in the repository. A short-lived function `cms-seed-relay` was used for the first two runs and then replaced with a handler that returns HTTP 410. It does not seed anymore.
 
+### Read-only mapper
+- [x] `src/lib/cms/` selects published rows and maps them without writing
+- [x] `npm run cms:parity` compared that snapshot with the static semantic model on project `pdqwaftiflaaelwzzypp` and reported MATCH
+- [x] Frontend cutover intentionally deferred
+
 ---
 
 ## In Progress
 
-Nothing in the React app.
+Nothing in the React app. The mapper is not imported by pages or components.
 
 ---
 
 ## Remaining
 
-- Read the seeded tables from a data-access layer
-- Switch pages off `src/data/*` only after visual parity is checked
+- Switch pages off `src/data/*` only after a visual cutover is approved
 - Authentication and admin role assignment
 - CMS dashboard
 - Admin write tests (not run; no admin user was created)
@@ -64,7 +68,7 @@ Nothing in the React app.
 
 ## Next Action
 
-Add a read-only data layer that loads the seeded Supabase rows and maps them back to the existing component props, with the current static data kept until the pages are switched on purpose.
+Keep pages on `src/data/*`. The next product step is an explicit visual cutover, one surface at a time, after the known collage CSS gaps are accepted or redesigned.
 
 ---
 
@@ -81,4 +85,4 @@ Add a read-only data layer that loads the seeded Supabase rows and maps them bac
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Frontend remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Semantic CMS parity matched. Frontend remains static.

@@ -15,7 +15,9 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
-    "seed:cms": "node scripts/seed-cms.mjs"
+    "seed:cms": "node scripts/seed-cms.mjs",
+    "cms:parity": "node scripts/check-cms-parity.mjs",
+    "test:cms": "node --test src/lib/cms/map-core.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",
