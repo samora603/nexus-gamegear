@@ -1,6 +1,14 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PageLayout } from '@/layouts/PageLayout'
-import { BlogIndexPage, BlogPostPage, CategoryPage, HomePage, NotFoundPage } from '@/routes/lazy-pages'
+import {
+  AdminLoginPage,
+  AdminShellPage,
+  BlogIndexPage,
+  BlogPostPage,
+  CategoryPage,
+  HomePage,
+  NotFoundPage,
+} from '@/routes/lazy-pages'
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +29,14 @@ export const router = createBrowserRouter([
       {
         path: 'blog/:slug',
         element: <BlogPostPage />,
+      },
+      {
+        path: 'admin/login',
+        element: <AdminLoginPage />,
+      },
+      {
+        path: 'admin',
+        element: <AdminShellPage />,
       },
       {
         path: ':categorySlug',

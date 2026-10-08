@@ -1,16 +1,18 @@
 # Project Status — GameGear Nexus
 
-> Last updated: single-author blog CMS (2026-10-08)
+> Last updated: admin authentication foundation (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Phase 2E — single-author blog foundation**
+**Phase 2F — Supabase Auth and admin authorization**
 
-Public routes `/blog` and `/blog/:slug` read published posts only. The site owner is one `blog_authors` row (`site-owner`, display name GameGear Nexus). Authentication and the admin editor are not built.
+`/admin/login` signs in with Supabase email and password. `/admin` is an authorization shell with no CMS editing. Admin UI access uses `app_metadata.role === 'admin'`. Database writes still depend on `is_admin()` and RLS.
 
-The homepage remains static. All six category pages remain CMS-backed.
+The homepage remains static. Category pages and the public blog are unchanged.
+
+No Auth user exists yet. Create the owner in the Supabase dashboard, then set App Metadata to `{ "role": "admin" }`. Do not put the password in the repository.
 
 ---
 
@@ -58,26 +60,33 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [x] Browser check: `/blog` shows “No published articles yet.” The draft slug shows the existing not-found page
 - [x] Browser check: `/`, `/communication-gadgets`, and `/computer-gadgets` still behave as before
 
+### Phase 2F authentication
+- [x] `/admin/login` and `/admin` authorization shell. No CMS forms
+- [x] Frontend admin check reads `app_metadata.role === 'admin'`
+- [x] RLS `is_admin()` is unchanged and remains the database boundary
+- [x] `auth.users` count is 0. No owner account was created by this change
+- [x] Logged-out browser check: `/admin` redirects to `/admin/login?next=%2Fadmin` and does not show the admin shell
+
 ---
 
 ## In Progress
 
-Nothing on the public category pages. Blog editing waits for authentication.
+The owner Auth account still has to be created in the Supabase dashboard before an admin can sign in.
 
 ---
 
 ## Remaining
 
-- Authentication and the site-owner CMS/admin interface
-- Admin write tests (not run; no admin user was created)
+- Create the owner user and set App Metadata `role` to `admin`
+- Phase 2G authenticated CMS admin
+- Admin write tests (not run; no admin user exists)
 - Blog categories/tags were not added. Product categories stay separate
 
 ---
 
 ## Not done
 
-- Authentication UI
-- Admin dashboard
+- Admin content editing
 - Multi-author management
 - Supabase-backed homepage
 
@@ -85,7 +94,7 @@ Nothing on the public category pages. Blog editing waits for authentication.
 
 ## Next Action
 
-Implement authentication and the authenticated CMS/admin interface for the site owner. Do not add multi-author management unless the requirements change.
+Phase 2G is the authenticated CMS admin. Do not start it until the owner Auth user exists and `app_metadata.role` is `admin`.
 
 ---
 
@@ -102,4 +111,4 @@ Implement authentication and the authenticated CMS/admin interface for the site 
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. The homepage remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. Admin sign-in exists, and no Auth user has been created. The homepage remains static.

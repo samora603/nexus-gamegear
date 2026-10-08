@@ -17,7 +17,8 @@
     "supabase:reset": "supabase db reset",
     "seed:cms": "node scripts/seed-cms.mjs",
     "cms:parity": "node scripts/check-cms-parity.mjs",
-    "test:cms": "node --test src/lib/cms/map-core.test.mjs src/lib/cms/category-source.test.mjs src/lib/cms/blog.test.mjs"
+    "test:cms": "node --test src/lib/cms/map-core.test.mjs src/lib/cms/category-source.test.mjs src/lib/cms/blog.test.mjs",
+    "test:auth": "node --test src/lib/auth/auth-access.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.109.0",

@@ -517,3 +517,14 @@ There is no existing blog screen in the Canva pages. `/blog` and `/blog/:slug` u
 - Product categories are not reused as blog tags.
 - The migration seeds one unpublished draft, `development-seed-draft`. It is not production content. `npm run seed:cms` upserts the same draft on `slug`.
 - A failed blog read shows an unavailable message. It does not substitute invented articles.
+
+---
+
+## 17. Admin authentication
+
+Phase 2F adds sign-in only. The future CMS admin (Phase 2G) should sit behind `/admin` and call the existing Supabase browser client. It must not send the service-role key.
+
+- Sign-in uses `signInWithPassword`. The session is the Supabase Auth session. Admin UI state reads `user.app_metadata.role === 'admin'`.
+- `public.is_admin()` still reads `auth.jwt() -> app_metadata ->> role`. A matching frontend flag does not grant database writes.
+- Create the owner in the Supabase dashboard. Set App Metadata, not User Metadata, to `{ "role": "admin" }`. Do not store the password in git.
+- `/admin/login` is public. Other `/admin` paths redirect signed-out visitors to the login page with an internal `next` path. Signed-in non-admins see an unauthorized state. There is no CMS form on the shell page.

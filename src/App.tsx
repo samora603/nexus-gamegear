@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { RouterProvider } from 'react-router-dom'
+import { AuthProvider } from '@/lib/auth/auth-context'
 import { router } from '@/routes/router'
 
 function RouteFallback() {
@@ -12,8 +13,10 @@ function RouteFallback() {
 
 export default function App() {
   return (
-    <Suspense fallback={<RouteFallback />}>
-      <RouterProvider router={router} />
-    </Suspense>
+    <AuthProvider>
+      <Suspense fallback={<RouteFallback />}>
+        <RouterProvider router={router} />
+      </Suspense>
+    </AuthProvider>
   )
 }
