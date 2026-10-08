@@ -2,7 +2,7 @@ import type { SubCategory } from '@/types/category'
 
 /**
  * Semantic CMS snapshot. Collage CSS stays in `src/data/category-collages.ts`.
- * Communication, Entertainment, and Computer Gadgets read this snapshot.
+ * All six category pages read this snapshot. The homepage does not.
  */
 export interface CmsSiteSettings {
   siteName: string

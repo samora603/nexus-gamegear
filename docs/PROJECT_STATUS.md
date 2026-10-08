@@ -1,27 +1,16 @@
 # Project Status — GameGear Nexus
 
-> Last updated: Computer Gadgets CMS canary (2026-10-08)
+> Last updated: category CMS integration complete (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Phase 2D — third category canary**
+**Category CMS integration — complete**
 
-CMS-backed routes:
+All six category pages load published CMS copy, pills, and public media URLs. Collage CSS stays in `src/data/category-collages.ts`. A CMS failure falls back to that category’s static data.
 
-- `/communication-gadgets`
-- `/entertainment-gadgets`
-- `/computer-gadgets`
-
-Static routes:
-
-- `/`
-- `/wearable-gadgets`
-- `/photography-gadgets`
-- `/power-charging-gadgets`
-
-Collage CSS stays in `src/data/category-collages.ts`. A CMS failure falls back to that category’s static data. Full CMS frontend integration is not complete.
+The homepage remains static. The blog and admin CMS are not started.
 
 ---
 
@@ -53,25 +42,24 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [x] `src/lib/cms/` selects published rows and maps them without writing
 - [x] `npm run cms:parity` compared that snapshot with the static semantic model on project `pdqwaftiflaaelwzzypp` and reported MATCH
 
-### Phase 2D canary
-- [x] Communication, Entertainment, and Computer Gadgets load published CMS copy, pills, and public media URLs
-- [x] CMS failure falls back to that category’s static data
-- [x] Browser check: Computer Gadgets rendered four remote collage images, three pills, and the existing printer clip path
-- [x] Browser check: a blocked Computer Gadgets request rendered the static fallback, then a fresh load returned to CMS
-- [x] Browser check: Communication and Entertainment stayed CMS-backed; homepage and Wearable Gadgets stayed static
-- [x] `npm run test:cms`, `npm run cms:parity`, `npm run lint`, and `npm run build` passed
+### Category CMS integration
+- [x] All six category routes are CMS-backed: communication, entertainment, computer, wearable, photography, and power-charging
+- [x] Homepage remains on `src/data/*`
+- [x] Browser check: each category rendered `data-category-source="cms"` and public `media` bucket images
+- [x] Browser check: a blocked CMS request rendered `static-fallback` with local images for all six categories, then fresh loads returned to CMS
+- [x] `npm run test:cms` (20 passed), `npm run cms:parity` (`MATCH`), `npm run lint`, and `npm run build` passed
 
 ---
 
 ## In Progress
 
-The homepage and three category routes remain static.
+Nothing in the category pages. The homepage remains static.
 
 ---
 
 ## Remaining
 
-- Cut over the remaining three categories only after this canary pattern is accepted
+- Blog / content-management layer
 - Authentication and admin role assignment
 - CMS dashboard
 - Admin write tests (not run; no admin user was created)
@@ -82,14 +70,14 @@ The homepage and three category routes remain static.
 
 - Authentication UI
 - Admin dashboard
+- Blog CMS
 - Supabase-backed homepage
-- Supabase-backed categories other than Communication, Entertainment, and Computer Gadgets
 
 ---
 
 ## Next Action
 
-Leave the homepage and the three remaining categories on `src/data/*`. The next cutover, if accepted, is one additional category using the same presentation-CSS plus CMS media pattern.
+Begin the blog CMS phase. Leave the homepage on `src/data/*`.
 
 ---
 
@@ -106,4 +94,4 @@ Leave the homepage and the three remaining categories on `src/data/*`. The next 
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Communication, Entertainment, and Computer Gadgets are the CMS canaries. The rest of the frontend remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. All six category pages are CMS-backed. The homepage remains static.

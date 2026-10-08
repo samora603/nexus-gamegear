@@ -2,6 +2,9 @@ export const CMS_CANARY_SLUGS: readonly [
   'communication-gadgets',
   'entertainment-gadgets',
   'computer-gadgets',
+  'wearable-gadgets',
+  'photography-gadgets',
+  'power-charging-gadgets',
 ]
 
 export function resolveCategorySource(slug: string): 'cms' | 'static'

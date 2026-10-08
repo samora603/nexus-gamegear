@@ -64,13 +64,19 @@ const cmsCategory = {
   },
 }
 
-test('three category canaries select CMS; other routes stay static', () => {
-  assert.equal(resolveCategorySource('communication-gadgets'), 'cms')
-  assert.equal(resolveCategorySource('entertainment-gadgets'), 'cms')
-  assert.equal(resolveCategorySource('computer-gadgets'), 'cms')
-  for (const slug of ['wearable-gadgets', 'photography-gadgets', 'power-charging-gadgets', '', '/']) {
-    assert.equal(resolveCategorySource(slug), 'static')
+test('all six categories select CMS; the homepage slug does not', () => {
+  for (const slug of [
+    'communication-gadgets',
+    'entertainment-gadgets',
+    'computer-gadgets',
+    'wearable-gadgets',
+    'photography-gadgets',
+    'power-charging-gadgets',
+  ]) {
+    assert.equal(resolveCategorySource(slug), 'cms')
   }
+  assert.equal(resolveCategorySource(''), 'static')
+  assert.equal(resolveCategorySource('/'), 'static')
 })
 
 test('canary merge keeps presentation CSS and swaps the media URL', () => {
@@ -293,6 +299,92 @@ test('a computer CMS failure keeps the static collage', () => {
   assert.equal(result.view.collage.images[1].src, '/local/printer.webp')
   assert.equal(result.view.collage.images[1].className.includes('clip-path'), true)
 })
+
+const remaining = [
+  {
+    slug: 'wearable-gadgets',
+    title: 'WEARABLE GADGETS',
+    designFile: '5.png',
+    image: { id: 'watch-main', className: 'absolute left-[36%] top-[12%] z-20 w-[46%] shadow-collage' },
+    panel: { id: 'white-panel', className: 'absolute left-[34%] top-[10%] z-0 rounded-window bg-white/15' },
+    file: 'watch-main.webp',
+  },
+  {
+    slug: 'photography-gadgets',
+    title: 'PHOTOGRAPHY GADGETS',
+    designFile: '6.png',
+    image: {
+      id: 'drone-main',
+      className: 'absolute left-[36%] top-[10%] z-20 w-[52%] rounded-collage shadow-collage',
+    },
+    panel: { id: 'white-window', className: 'absolute left-[32%] top-[6%] z-0 rounded-window bg-white/20 backdrop-blur-sm' },
+    file: 'drone-main.webp',
+  },
+  {
+    slug: 'power-charging-gadgets',
+    title: 'POWER AND CHARGING GADGETS',
+    designFile: '7.png',
+    image: { id: 'wireless-charger', className: 'absolute left-[36%] top-[18%] z-30 w-[44%] shadow-collage' },
+    panel: { id: 'wood-surface', className: 'absolute left-[30%] top-[8%] z-0 rounded-window bg-stone-300/25' },
+    file: 'wireless-charger.webp',
+  },
+]
+
+for (const entry of remaining) {
+  const staticCategory = {
+    category: {
+      slug: entry.slug,
+      name: entry.slug,
+      displayTitle: 'STATIC',
+      cardLabel: 'Static',
+      designFile: entry.designFile,
+      subCategories: [],
+    },
+    collage: {
+      containerClassName: 'min-h-[22rem]',
+      panels: [entry.panel],
+      images: [{ id: entry.image.id, src: `/local/${entry.file}`, alt: 'Local', className: entry.image.className }],
+    },
+  }
+  const cmsCategory = {
+    slug: entry.slug,
+    name: entry.slug,
+    displayTitle: entry.title,
+    cardLabel: entry.slug,
+    offsetCard: false,
+    pills: [{ slug: 'sample', name: 'Sample' }],
+    collage: {
+      overlayPrimary: null,
+      overlaySecondary: null,
+      layers: [
+        { key: entry.panel.id, type: 'panel', storagePath: null, alt: null },
+        {
+          key: entry.image.id,
+          type: 'image',
+          storagePath: `categories/${entry.slug}/${entry.file}`,
+          alt: 'Remote',
+        },
+      ],
+    },
+  }
+
+  test(`${entry.slug} keeps presentation classes and swaps the media URL`, () => {
+    const merged = mergeCanaryCategory(staticCategory, cmsCategory, (path) => `https://cdn.test/media/${path}`)
+    assert.equal(merged.category.displayTitle, entry.title)
+    assert.equal(merged.category.designFile, entry.designFile)
+    assert.equal(merged.collage.images[0].className, entry.image.className)
+    assert.equal(merged.collage.panels[0].className, entry.panel.className)
+    assert.equal(merged.collage.images[0].src, `https://cdn.test/media/categories/${entry.slug}/${entry.file}`)
+    assert.equal(merged.collage.overlayText, undefined)
+    assert.equal(staticCategory.collage.images[0].src, `/local/${entry.file}`)
+  })
+
+  test(`${entry.slug} falls back to the static collage`, () => {
+    const result = presentCanary(staticCategory, { ok: false })
+    assert.equal(result.source, 'static-fallback')
+    assert.equal(result.view, staticCategory)
+  })
+}
 
 test('an image without presentation CSS fails closed', () => {
   const extra = structuredClone(cmsCategory)

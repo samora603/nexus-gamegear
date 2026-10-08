@@ -8,6 +8,9 @@ export const CMS_CANARY_SLUGS = [
   'communication-gadgets',
   'entertainment-gadgets',
   'computer-gadgets',
+  'wearable-gadgets',
+  'photography-gadgets',
+  'power-charging-gadgets',
 ]
 
 export function resolveCategorySource(slug) {
