@@ -1,4 +1,4 @@
-export const CMS_CANARY_SLUG: 'communication-gadgets'
+export const CMS_CANARY_SLUGS: readonly ['communication-gadgets', 'entertainment-gadgets']
 
 export function resolveCategorySource(slug: string): 'cms' | 'static'
 

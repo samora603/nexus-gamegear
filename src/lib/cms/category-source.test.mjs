@@ -64,15 +64,16 @@ const cmsCategory = {
   },
 }
 
-test('only communication gadgets selects the CMS source', () => {
+test('communication and entertainment select CMS; other routes stay static', () => {
   assert.equal(resolveCategorySource('communication-gadgets'), 'cms')
+  assert.equal(resolveCategorySource('entertainment-gadgets'), 'cms')
   for (const slug of [
-    'entertainment-gadgets',
     'computer-gadgets',
     'wearable-gadgets',
     'photography-gadgets',
     'power-charging-gadgets',
     '',
+    '/',
   ]) {
     assert.equal(resolveCategorySource(slug), 'static')
   }
@@ -99,6 +100,95 @@ test('a CMS failure keeps the static view', () => {
   const result = presentCanary(staticView, { ok: false })
   assert.equal(result.source, 'static-fallback')
   assert.equal(result.view, staticView)
+})
+
+const entertainmentStatic = {
+  category: {
+    slug: 'entertainment-gadgets',
+    name: 'Entertainment Gadgets',
+    displayTitle: 'STATIC ENTERTAINMENT',
+    cardLabel: 'Entertainment gadgets',
+    designFile: '3.png',
+    subCategories: [],
+  },
+  collage: {
+    containerClassName: 'min-h-[22rem]',
+    images: [
+      {
+        id: 'vintage-tvs',
+        src: '/local/vintage.webp',
+        alt: 'Local vintage',
+        className: 'absolute right-[2%] top-[0%] z-10 w-[32%] opacity-90',
+      },
+      {
+        id: 'headphones',
+        src: '/local/headphones.webp',
+        alt: 'Local headphones',
+        className:
+          'absolute bottom-[4%] left-[24%] z-30 w-[28%] rounded-glass border border-white/10 bg-white/10 p-1 backdrop-blur-sm',
+      },
+    ],
+  },
+}
+
+const entertainmentCms = {
+  slug: 'entertainment-gadgets',
+  name: 'Entertainment Gadgets',
+  displayTitle: 'ENTERTAINMENT GADGETS',
+  cardLabel: 'Entertainment gadgets',
+  offsetCard: false,
+  pills: [
+    { slug: 'tv', name: 'TV' },
+    { slug: 'gaming-consoles', name: 'Gaming Consoles' },
+    { slug: 'headphones', name: 'Headphones' },
+    { slug: 'speakers', name: 'Speakers' },
+  ],
+  collage: {
+    overlayPrimary: null,
+    overlaySecondary: null,
+    layers: [
+      {
+        key: 'headphones',
+        type: 'image',
+        storagePath: 'categories/entertainment-gadgets/headphones.webp',
+        alt: 'Remote headphones',
+      },
+      {
+        key: 'vintage-tvs',
+        type: 'image',
+        storagePath: 'categories/entertainment-gadgets/vintage-tvs.webp',
+        alt: 'Remote vintage',
+      },
+    ],
+  },
+}
+
+test('entertainment keeps collage CSS and does not invent overlay text', () => {
+  const merged = mergeCanaryCategory(
+    entertainmentStatic,
+    entertainmentCms,
+    (path) => `https://cdn.test/media/${path}`,
+  )
+  assert.equal(merged.category.displayTitle, 'ENTERTAINMENT GADGETS')
+  assert.equal(merged.category.designFile, '3.png')
+  assert.deepEqual(
+    merged.collage.images.map((image) => image.id),
+    ['vintage-tvs', 'headphones'],
+  )
+  assert.equal(
+    merged.collage.images[0].src,
+    'https://cdn.test/media/categories/entertainment-gadgets/vintage-tvs.webp',
+  )
+  assert.equal(merged.collage.images[1].className, entertainmentStatic.collage.images[1].className)
+  assert.equal(merged.collage.overlayText, undefined)
+  assert.equal(entertainmentStatic.collage.images[0].src, '/local/vintage.webp')
+})
+
+test('an entertainment CMS failure keeps the static collage', () => {
+  const result = presentCanary(entertainmentStatic, { ok: false })
+  assert.equal(result.source, 'static-fallback')
+  assert.equal(result.view.collage.images[1].className.includes('rounded-glass'), true)
+  assert.equal(result.view.collage.images[0].src, '/local/vintage.webp')
 })
 
 test('an image without presentation CSS fails closed', () => {

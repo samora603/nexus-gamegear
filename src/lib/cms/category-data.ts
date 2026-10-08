@@ -26,10 +26,10 @@ export function readStaticCategory(slug: string): CategoryView | null {
   return { category, collage }
 }
 
-function reportCanaryFailure(error: unknown) {
+function reportCanaryFailure(categoryName: string, error: unknown) {
   if (!import.meta.env.DEV) return
   const code = error instanceof CmsError ? error.code : 'CMS_QUERY_FAILED'
-  console.error(`Communication Gadgets CMS canary failed (${code}). Using static data.`)
+  console.error(`${categoryName} CMS canary failed (${code}). Using static data.`)
 }
 
 export async function loadCanaryCategory(staticView: CategoryView): Promise<CategoryPageData> {
@@ -44,29 +44,30 @@ export async function loadCanaryCategory(staticView: CategoryView): Promise<Cate
     })
     return { status: 'ready', source: presented.source, view: presented.view }
   } catch (error) {
-    reportCanaryFailure(error)
+    reportCanaryFailure(staticView.category.name, error)
     return { status: 'ready', source: 'static-fallback', view: staticView }
   }
 }
 
-/** Static categories resolve immediately. Only the canary slug waits on Supabase. */
+/** Static categories resolve immediately. Only canary slugs wait on Supabase. */
 export function useCategoryPageData(slug: string): CategoryPageData {
   const usesCms = resolveCategorySource(slug) === 'cms'
   const staticView = useMemo(() => readStaticCategory(slug), [slug])
-  const [canary, setCanary] = useState<CategoryPageData | null>(null)
+  const [canary, setCanary] = useState<{ slug: string; data: CategoryPageData } | null>(null)
 
   useEffect(() => {
     if (!usesCms || !staticView) return
     let cancelled = false
     loadCanaryCategory(staticView).then((result) => {
-      if (!cancelled) setCanary(result)
+      if (!cancelled) setCanary({ slug, data: result })
     })
     return () => {
       cancelled = true
     }
-  }, [usesCms, staticView])
+  }, [slug, usesCms, staticView])
 
   if (!staticView) return { status: 'not-found' }
   if (!usesCms) return { status: 'ready', source: 'static', view: staticView }
-  return canary ?? { status: 'loading' }
+  if (!canary || canary.slug !== slug) return { status: 'loading' }
+  return canary.data
 }

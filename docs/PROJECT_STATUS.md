@@ -1,16 +1,27 @@
 # Project Status — GameGear Nexus
 
-> Last updated: Communication Gadgets CMS canary (2026-10-08)
+> Last updated: Entertainment Gadgets CMS canary (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Phase 2D — Communication Gadgets canary**
+**Phase 2D — second category canary**
 
-`/communication-gadgets` loads published CMS copy, pills, and public media URLs. Collage CSS stays in `src/data/category-collages.ts`. The homepage and the other five category pages still render only from `src/data/*`. Full CMS frontend integration is not complete.
+CMS-backed routes:
 
-If the canary request fails, that page falls back to the static Communication Gadgets data. The failure is logged in development as a code only.
+- `/communication-gadgets`
+- `/entertainment-gadgets`
+
+Static routes:
+
+- `/`
+- `/computer-gadgets`
+- `/wearable-gadgets`
+- `/photography-gadgets`
+- `/power-charging-gadgets`
+
+Collage CSS stays in `src/data/category-collages.ts`. A CMS failure falls back to that category’s static data. Full CMS frontend integration is not complete.
 
 ---
 
@@ -43,23 +54,23 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [x] `npm run cms:parity` compared that snapshot with the static semantic model on project `pdqwaftiflaaelwzzypp` and reported MATCH
 
 ### Phase 2D canary
-- [x] `/communication-gadgets` is the only CMS-backed route
-- [x] CMS failure falls back to static Communication Gadgets data
-- [x] Browser check: remote collage images loaded, pills and heading rendered, chamfer clip and overlay skew still came from the static classes
-- [x] Browser check: a blocked CMS request rendered the static fallback
-- [x] Browser check: `/entertainment-gadgets` stayed on local image files
+- [x] `/communication-gadgets` and `/entertainment-gadgets` load published CMS copy, pills, and public media URLs
+- [x] CMS failure falls back to that category’s static data
+- [x] Browser check: Entertainment Gadgets rendered five remote collage images, four pills, and the existing glass-frame class
+- [x] Browser check: a blocked Entertainment Gadgets request rendered the static fallback
+- [x] Browser check: Communication Gadgets stayed CMS-backed; homepage and Computer Gadgets stayed static
 
 ---
 
 ## In Progress
 
-The other category routes and the homepage remain static.
+The homepage and four category routes remain static.
 
 ---
 
 ## Remaining
 
-- Cut over the other five categories only after this canary pattern is accepted
+- Cut over the remaining four categories only after this canary pattern is accepted
 - Authentication and admin role assignment
 - CMS dashboard
 - Admin write tests (not run; no admin user was created)
@@ -71,13 +82,13 @@ The other category routes and the homepage remain static.
 - Authentication UI
 - Admin dashboard
 - Supabase-backed homepage
-- Supabase-backed categories other than Communication Gadgets
+- Supabase-backed categories other than Communication Gadgets and Entertainment Gadgets
 
 ---
 
 ## Next Action
 
-Leave the other pages on `src/data/*`. The next cutover, if accepted, is one additional category using the same presentation-CSS plus CMS media pattern.
+Leave the homepage and the four remaining categories on `src/data/*`. The next cutover, if accepted, is one additional category using the same presentation-CSS plus CMS media pattern.
 
 ---
 
@@ -94,4 +105,4 @@ Leave the other pages on `src/data/*`. The next cutover, if accepted, is one add
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Communication Gadgets is the CMS canary. The rest of the frontend remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Communication Gadgets and Entertainment Gadgets are the CMS canaries. The rest of the frontend remains static.
