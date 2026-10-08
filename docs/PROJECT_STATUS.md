@@ -1,61 +1,56 @@
 # Project Status — GameGear Nexus
 
-> Last updated: remote Supabase synchronization (2026-10-08)
+> Last updated: CMS seed (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**CMS integration — next**
+**Frontend data layer — next**
 
-The static frontend is unchanged. The remote database foundation is in place and verified. Pages still read `src/data/*`.
+The static frontend is unchanged and still reads `src/data/*`. The remote database now holds that same content.
 
 ---
 
 ## Completed
 
-### Phase 1 — Static Frontend MVP
-- [x] Project foundation
+### Static frontend
 - [x] Homepage
 - [x] Reusable category template for all six category pages
 
-### CMS architecture
-- [x] `docs/DATABASE_PLAN.md`
-- [x] `docs/CMS_ARCHITECTURE.md`
-- [x] Collage model (percentages and variant enums, no CSS in the database)
+### Remote schema
+- [x] Project `pdqwaftiflaaelwzzypp` (`https://pdqwaftiflaaelwzzypp.supabase.co`)
+- [x] Migrations `20250901000000` through `20250901000013` applied
+- [x] RLS on all 10 application tables
+- [x] Buckets `media` (public) and `uploads` (private)
 
-### Remote Supabase foundation
-- [x] Linked remote project `pdqwaftiflaaelwzzypp` (`https://pdqwaftiflaaelwzzypp.supabase.co`)
-- [x] Repository migrations applied to that remote project
-- [x] Remote migration history matches `supabase/migrations/` versions `20250901000000` through `20250901000013`
-- [x] 10 public application tables verified remotely
-- [x] Foreign keys verified remotely
-- [x] RLS enabled on all 10 application tables
-- [x] Public read / admin write policies verified remotely
-- [x] `is_admin()` and `set_updated_at()` verified remotely
-- [x] Storage buckets `media` (public read) and `uploads` (not public) verified remotely
-- [x] Storage policies verified remotely
-- [x] Browser client foundation in `src/lib/supabase.ts` (not used by pages yet)
-- [x] Gitignored `.env.local` holds the project URL and anon key
+### CMS seed
+- [x] Script: `scripts/seed-cms.mjs` (`npm run seed:cms`)
+- [x] 38 WebP files in the `media` bucket
+- [x] 38 `media_assets` rows, paths `home/<file>.webp` and `categories/<slug>/<file>.webp`
+- [x] Tables seeded and re-checked after a second run: site_settings 1, social_links 3, features 3, content_blocks 2, categories 6, category_pills 19, category_collages 6, collage_layers 31, contact_grid_images 1
+- [x] Foreign keys resolve; no duplicate storage paths
+- [x] Anonymous clients can read published rows and public media URLs
+- [x] Anonymous insert/update/delete and storage writes were denied
+- [x] Unpublished probe row was not visible to the anon key, then removed
 
-The Supabase CLI on this machine cannot access this project (privilege error). Migrations were applied through the authenticated project connection, then the remote migration versions were aligned to the repository filenames. No content was seeded.
+The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in the repository. A short-lived function `cms-seed-relay` was used for the first two runs and then replaced with a handler that returns HTTP 410. It does not seed anymore.
 
 ---
 
 ## In Progress
 
-Nothing in the frontend. The next stage is CMS integration.
+Nothing in the React app.
 
 ---
 
 ## Remaining
 
-- Connect a frontend data layer to Supabase
-- Seed CMS content from the current static data (separate task; not done)
-- Replace static data where appropriate, after seeding
-- Implement authentication and admin authorization in the app
-- Build the CMS dashboard
-- Test anonymous reads and admin writes against RLS
+- Read the seeded tables from a data-access layer
+- Switch pages off `src/data/*` only after visual parity is checked
+- Authentication and admin role assignment
+- CMS dashboard
+- Admin write tests (not run; no admin user was created)
 
 ---
 
@@ -63,17 +58,27 @@ Nothing in the frontend. The next stage is CMS integration.
 
 - Authentication UI
 - Admin dashboard
-- Content seeding
 - Supabase-backed pages
 
 ---
 
 ## Next Action
 
-Seed the empty remote tables from the existing static content, without changing page components until the seed is verified.
+Add a read-only data layer that loads the seeded Supabase rows and maps them back to the existing component props, with the current static data kept until the pages are switched on purpose.
+
+---
+
+## Known seed limits
+
+- Overlay text is stored. Its Tailwind position is not, because the text box has no width in the schema.
+- The communication primary clip is a bottom-right chamfer. The schema only has `chamfer_bottom_left` and `notch_top_right`, so that clip is stored as `none`.
+- The dark overlay skew is not stored. `rotation_deg` is 0.
+- Layers positioned with `bottom` and no height use a square-box fallback for `pos_top_pct`. `height_pct` stays null.
+- `designFile` and `contactAnchor` are not database columns.
+- `docs/SUPABASE_SETUP.md` still describes the earlier empty-project setup.
 
 ---
 
 ## Cursor State
 
-Remote schema verified on `pdqwaftiflaaelwzzypp`. Frontend remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Frontend remains static.

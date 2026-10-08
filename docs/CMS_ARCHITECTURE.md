@@ -368,6 +368,18 @@ Phase 3: Admin dashboard CRUD
 
 ---
 
+## 16. Seed process
+
+Repeatable seed: `npm run seed:cms` (`scripts/seed-cms.mjs`).
+
+It checks the manifest against `src/data/*` and the WebP files under `src/assets/images/`, uploads those files to the `media` bucket, and upserts the CMS tables. Paths stored in `media_assets.storage_path` are relative to the bucket (`home/...`, `categories/<slug>/...`). The public URL is `{SUPABASE_URL}/storage/v1/object/public/media/{storage_path}`.
+
+The script needs `SUPABASE_SERVICE_ROLE_KEY` in the environment. Do not commit that key. Anonymous writes stay denied.
+
+`designFile` and `contactAnchor` are frontend-only and are not columns. Overlay text is stored; overlay pixel classes are not, because the schema has no width for that text box. Some collage clips and the dark-overlay skew are recorded in the seed log when they do not map onto the approved enums.
+
+---
+
 ## 10. Security Model
 
 ### Auth
