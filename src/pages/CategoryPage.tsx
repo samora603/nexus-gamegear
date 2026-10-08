@@ -1,23 +1,30 @@
 import NotFoundPage from '@/pages/NotFoundPage'
-import { categories } from '@/data/categories'
-import { getCategoryCollage } from '@/data/category-collages'
-import { getCategoryBySlug } from '@/types/category'
+import { useCategoryPageData } from '@/lib/cms/category-data'
 import { CategoryLayout } from '@/layouts/CategoryLayout'
 import { CategoryPageContent } from '@/components/category/CategoryPageContent'
 import { useParams } from 'react-router-dom'
 
 export default function CategoryPage() {
   const { categorySlug = '' } = useParams<{ categorySlug: string }>()
-  const category = getCategoryBySlug(categorySlug, categories)
-  const collage = category ? getCategoryCollage(category.slug) : undefined
+  const page = useCategoryPageData(categorySlug)
 
-  if (!category || !collage) {
+  if (page.status === 'not-found') {
     return <NotFoundPage />
   }
 
   return (
     <CategoryLayout>
-      <CategoryPageContent category={category} collage={collage} />
+      {page.status === 'loading' ? (
+        <p className="font-body text-sm text-white/70" role="status">
+          Loading category
+        </p>
+      ) : (
+        <CategoryPageContent
+          category={page.view.category}
+          collage={page.view.collage}
+          source={page.source}
+        />
+      )}
     </CategoryLayout>
   )
 }

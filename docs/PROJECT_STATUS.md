@@ -1,14 +1,16 @@
 # Project Status — GameGear Nexus
 
-> Last updated: read-only CMS mapper (2026-10-08)
+> Last updated: Communication Gadgets CMS canary (2026-10-08)
 
 ---
 
 ## Current Phase
 
-**Phase 2C — read-only CMS mapper**
+**Phase 2D — Communication Gadgets canary**
 
-`src/lib/cms/` can load published Supabase rows and map them to a semantic snapshot. Pages still render only from `src/data/*`. Switching the React app to this mapper is deferred.
+`/communication-gadgets` loads published CMS copy, pills, and public media URLs. Collage CSS stays in `src/data/category-collages.ts`. The homepage and the other five category pages still render only from `src/data/*`. Full CMS frontend integration is not complete.
+
+If the canary request fails, that page falls back to the static Communication Gadgets data. The failure is logged in development as a code only.
 
 ---
 
@@ -39,19 +41,25 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 ### Read-only mapper
 - [x] `src/lib/cms/` selects published rows and maps them without writing
 - [x] `npm run cms:parity` compared that snapshot with the static semantic model on project `pdqwaftiflaaelwzzypp` and reported MATCH
-- [x] Frontend cutover intentionally deferred
+
+### Phase 2D canary
+- [x] `/communication-gadgets` is the only CMS-backed route
+- [x] CMS failure falls back to static Communication Gadgets data
+- [x] Browser check: remote collage images loaded, pills and heading rendered, chamfer clip and overlay skew still came from the static classes
+- [x] Browser check: a blocked CMS request rendered the static fallback
+- [x] Browser check: `/entertainment-gadgets` stayed on local image files
 
 ---
 
 ## In Progress
 
-Nothing in the React app. The mapper is not imported by pages or components.
+The other category routes and the homepage remain static.
 
 ---
 
 ## Remaining
 
-- Switch pages off `src/data/*` only after a visual cutover is approved
+- Cut over the other five categories only after this canary pattern is accepted
 - Authentication and admin role assignment
 - CMS dashboard
 - Admin write tests (not run; no admin user was created)
@@ -62,13 +70,14 @@ Nothing in the React app. The mapper is not imported by pages or components.
 
 - Authentication UI
 - Admin dashboard
-- Supabase-backed pages
+- Supabase-backed homepage
+- Supabase-backed categories other than Communication Gadgets
 
 ---
 
 ## Next Action
 
-Keep pages on `src/data/*`. The next product step is an explicit visual cutover, one surface at a time, after the known collage CSS gaps are accepted or redesigned.
+Leave the other pages on `src/data/*`. The next cutover, if accepted, is one additional category using the same presentation-CSS plus CMS media pattern.
 
 ---
 
@@ -85,4 +94,4 @@ Keep pages on `src/data/*`. The next product step is an explicit visual cutover,
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Semantic CMS parity matched. Frontend remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Communication Gadgets is the CMS canary. The rest of the frontend remains static.

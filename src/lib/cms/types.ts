@@ -1,9 +1,8 @@
 import type { SubCategory } from '@/types/category'
 
 /**
- * Semantic CMS snapshot. This is not `CategoryCollageConfig`: that type stores
- * Tailwind class strings, and the database does not. Pages keep using
- * `src/data/*` until a later cutover.
+ * Semantic CMS snapshot. Collage CSS stays in `src/data/category-collages.ts`.
+ * Only the Communication Gadgets page reads this snapshot.
  */
 export interface CmsSiteSettings {
   siteName: string

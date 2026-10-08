@@ -5,7 +5,7 @@ import type { CmsSnapshot } from './types'
 
 /**
  * Load the published CMS snapshot with the anon key.
- * Selects only. This module is not imported by pages.
+ * Selects only. Pages call this through the category data module.
  */
 export async function loadPublishedCms(): Promise<CmsSnapshot> {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL

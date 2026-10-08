@@ -7,15 +7,20 @@ import { CategoryTitle } from '@/components/category/CategoryTitle'
 export interface CategoryPageContentProps {
   category: Category
   collage: CategoryCollageConfig
+  source?: 'static' | 'cms' | 'static-fallback'
 }
 
 /** Reusable category page body — title, pills, and image collage. */
 export function CategoryPageContent({
   category,
   collage,
+  source,
 }: CategoryPageContentProps) {
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,24rem)_1fr] xl:gap-8">
+    <div
+      className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start lg:gap-6 xl:grid-cols-[minmax(0,24rem)_1fr] xl:gap-8"
+      data-category-source={source}
+    >
       <div className="flex flex-col gap-8 lg:gap-10 lg:pt-2">
         <CategoryTitle title={category.displayTitle} />
         <CategoryPills
