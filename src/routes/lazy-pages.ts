@@ -10,4 +10,6 @@ export const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboar
 export const AdminBlogListPage = lazy(() => import('@/pages/admin/AdminBlogListPage'))
 export const AdminBlogEditorPage = lazy(() => import('@/pages/admin/AdminBlogEditorPage'))
 export const AdminMediaPage = lazy(() => import('@/pages/admin/AdminMediaPage'))
+export const AdminCategoryListPage = lazy(() => import('@/pages/admin/AdminCategoryListPage'))
+export const AdminCategoryEditorPage = lazy(() => import('@/pages/admin/AdminCategoryEditorPage'))
 export const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))

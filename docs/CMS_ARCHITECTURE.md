@@ -547,3 +547,15 @@ Phase 2G replaces the authorization shell with dashboard, blog, and media screen
 - Mutations use `getSupabaseClient()` with the Auth session. `public.is_admin()` remains the database boundary.
 
 Phase 2H checked the live project on 2026-10-13. The existing confirmed Auth user now has App Metadata `role` `admin`, with `provider` and `providers` preserved. `is_admin()` and RLS were not changed. The CMS was not signed in during that update. Homepage CMS stays blocked until an admin session completes the draft, publish, unpublish, delete, and upload checks.
+
+---
+
+## 19. Category management
+
+Phase 2I adds `/admin/categories` and `/admin/categories/:id`. The editor updates `name`, `display_title`, `card_label`, `sort_order`, and `published` on `categories`. It does not change `slug`, `card_media_id`, or collage rows.
+
+Pills keep their existing `slug` when the label changes. A new pill gets a slug from its label. Reordering writes `sort_order`. Removing a pill deletes that row. There is no category delete.
+
+Public category routes still call `loadPublishedCms()`. RLS already hides unpublished categories and pills. If the published snapshot loads and omits a known category slug, the page is not found. A failed CMS request still uses the static collage. The homepage cards stay on `src/data/categories.ts`, so they do not follow title or publication edits.
+
+Writes use `categories_admin_all` and `category_pills_admin_all`, both gated by `is_admin()`. No migration was added.

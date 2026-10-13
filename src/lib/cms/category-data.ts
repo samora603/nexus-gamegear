@@ -4,7 +4,7 @@ import { getCategoryCollage } from '@/data/category-collages'
 import type { Category } from '@/types/category'
 import type { CategoryCollageConfig } from '@/types/collage'
 
-import { presentCanary, resolveCategorySource } from './category-source.mjs'
+import { presentPublishedCategory, resolveCategorySource } from './category-source.mjs'
 import { mediaPublicUrl } from './mappers'
 import { CmsError } from './read-cms.mjs'
 import { loadPublishedCms } from './queries'
@@ -33,20 +33,21 @@ function reportCanaryFailure(categoryName: string, error: unknown) {
 }
 
 export async function loadCanaryCategory(staticView: CategoryView): Promise<CategoryPageData> {
+  let snapshot
   try {
-    const snapshot = await loadPublishedCms()
-    const cmsCategory = snapshot.categories.find((entry) => entry.slug === staticView.category.slug)
-    if (!cmsCategory) throw new CmsError('CMS_CATEGORY_MAPPING_FAILED', 'Canary category was not published')
-    const presented = presentCanary(staticView, {
-      ok: true,
-      category: cmsCategory,
-      resolveUrl: (storagePath) => mediaPublicUrl(storagePath),
-    })
-    return { status: 'ready', source: presented.source, view: presented.view }
+    snapshot = await loadPublishedCms()
   } catch (error) {
     reportCanaryFailure(staticView.category.name, error)
     return { status: 'ready', source: 'static-fallback', view: staticView }
   }
+  const presented = presentPublishedCategory(staticView, snapshot.categories, (storagePath) =>
+    mediaPublicUrl(storagePath),
+  )
+  if (presented.status === 'not-found') return presented
+  if (presented.source === 'static-fallback') {
+    reportCanaryFailure(staticView.category.name, new CmsError('CMS_CATEGORY_MAPPING_FAILED', 'Category mapping failed'))
+  }
+  return presented
 }
 
 /** Static categories resolve immediately. Only canary slugs wait on Supabase. */

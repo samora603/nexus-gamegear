@@ -80,4 +80,23 @@ test('anonymous clients cannot write blog posts, media rows, or storage objects'
     body: new Uint8Array([1, 2, 3]),
   })
   assert.ok(upload.status === 400 || upload.status === 401 || upload.status === 403)
+
+  const updateCategory = await fetch(`${supabaseUrl}/rest/v1/categories?slug=eq.communication-gadgets`, {
+    method: 'PATCH',
+    headers: requestHeaders,
+    body: JSON.stringify({ name: 'Anonymous category change' }),
+  })
+  assert.equal(updateCategory.status, 200)
+  assert.deepEqual(await updateCategory.json(), [])
+
+  const insertPill = await fetch(`${supabaseUrl}/rest/v1/category_pills`, {
+    method: 'POST',
+    headers: requestHeaders,
+    body: JSON.stringify({
+      category_id: '11111111-1111-4111-8111-111111111111',
+      slug: 'anonymous-pill',
+      label: 'Anonymous pill',
+    }),
+  })
+  assert.ok(insertPill.status === 401 || insertPill.status === 403)
 })

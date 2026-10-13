@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth/use-auth'
 const links = [
   { to: '/admin', label: 'Dashboard', end: true },
   { to: '/admin/blog', label: 'Blog', end: false },
+  { to: '/admin/categories', label: 'Categories', end: false },
   { to: '/admin/media', label: 'Media', end: false },
 ]
 

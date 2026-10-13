@@ -17,7 +17,7 @@
     "supabase:reset": "supabase db reset",
     "seed:cms": "node scripts/seed-cms.mjs",
     "cms:parity": "node scripts/check-cms-parity.mjs",
-    "test:cms": "node --test src/lib/cms/map-core.test.mjs src/lib/cms/category-source.test.mjs src/lib/cms/blog.test.mjs src/lib/cms/blog-admin.test.mjs src/lib/cms/media-admin.test.mjs",
+    "test:cms": "node --test src/lib/cms/map-core.test.mjs src/lib/cms/category-source.test.mjs src/lib/cms/category-admin.test.mjs src/lib/cms/blog.test.mjs src/lib/cms/blog-admin.test.mjs src/lib/cms/media-admin.test.mjs",
     "test:auth": "node --test src/lib/auth/auth-access.test.mjs",
     "test:admin": "node --test src/lib/cms/admin-rls.test.mjs src/lib/cms/blog-admin.test.mjs src/lib/cms/media-admin.test.mjs"
   },

@@ -32,6 +32,12 @@ export function mergeCanaryCategory<TCategory extends { slug: string }, TCollage
   resolveUrl: (storagePath: string) => string | null,
 ): { category: TCategory; collage: TCollage }
 
+export function presentPublishedCategory<TView extends { category: { slug: string } }>(
+  staticView: TView,
+  categories: Parameters<typeof mergeCanaryCategory>[1][],
+  resolveUrl: (storagePath: string) => string | null,
+): { status: 'not-found' } | { status: 'ready'; source: 'cms' | 'static-fallback'; view: TView }
+
 export function presentCanary<TView>(
   staticView: TView,
   loaded:

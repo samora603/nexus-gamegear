@@ -1,18 +1,16 @@
 # Project Status — GameGear Nexus
 
-> Last updated: owner App Metadata role (2026-10-13)
+> Last updated: category management (2026-10-13)
 
 ---
 
 ## Current Phase
 
-**Phase 2H — authenticated CMS owner verification**
+**Phase 2I — basic category management**
 
-The existing confirmed Auth user on `pdqwaftiflaaelwzzypp` now has App Metadata `role` set to `admin`. `provider` and `providers` were kept. User Metadata was not changed. `public.is_admin()` still reads `auth.jwt() -> app_metadata ->> role`.
+`/admin/categories` lists the six categories. The editor changes name, display title, card label, sort order, publication, and pills. Slugs, card images, and collages are unchanged. Unpublished categories are omitted by RLS and render as not found. A failed CMS load still uses the static collage. Homepage cards stay static.
 
-No sign-in was performed. The role is stored on the account and will be present in a JWT issued after the next successful sign-in. Dashboard counts, session refresh, blog create/edit/publish/unpublish/delete, media upload, and logout after a real session remain unverified.
-
-The homepage remains static. Category pages and the public blog read path are unchanged. Seeded content was not modified: 1 blog post (`development-seed-draft`) and 38 media assets.
+The existing owner has App Metadata `role` `admin`. On 2026-10-13 the seed post `development-seed-draft` was verified as `draft`. Parity remains 6 categories, 19 pills, 6 collages, 31 layers, and 38 media. `npm run test:cms` is 47 tests.
 
 ---
 
@@ -82,21 +80,29 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [ ] Admin session, dashboard, blog workflow, and media upload remain unverified
 - [ ] Authenticated non-admin writes remain unverified. No second account was created
 
+### Phase 2I category management
+- [x] `/admin/categories` and `/admin/categories/:id`
+- [x] Category copy, sort order, publication, and pill label, order, add, and remove
+- [x] Unpublished categories do not fall back to the static public page
+- [x] Anonymous category and pill writes denied. `communication-gadgets` name stayed `Communication Gadgets`
+- [ ] Live title, pill, and publication edits were not saved against production rows in this change
+
 ---
 
 ## In Progress
 
-The owner role is stored. The CMS workflow still needs a real sign-in before it is verified.
+The category editor is in the admin. A live save against a production category still needs the owner session.
 
 ---
 
 ## Remaining
 
-- Sign in at `/admin/login` and confirm the session reaches `/admin`
-- Confirm draft, publish, unpublish, delete, and media upload in the browser
-- Admin JWT write tests
+- Save a category title, pill change, and publication change in the browser, then reload the public route
+- Confirm blog draft, publish, unpublish, delete, and media upload with disposable content
+- Admin JWT write tests beyond the anonymous denials
 - Authenticated non-admin write tests
 - Blog categories/tags were not added. Product categories stay separate
+- Homepage still ignores category title and publication edits
 
 ---
 
@@ -104,13 +110,14 @@ The owner role is stored. The CMS workflow still needs a real sign-in before it 
 
 - Multi-author management
 - Supabase-backed homepage
-- Category, feature, and site-settings editors
+- Collage, layer, and category-card image editing
+- Category deletion
 
 ---
 
 ## Next Action
 
-Sign in as the existing owner and repeat the Phase 2H browser workflow. Homepage CMS waits until that gate passes.
+Sign in and exercise `/admin/categories` with a reversible edit, then confirm the public category page. Homepage CMS stays later.
 
 ---
 
@@ -127,4 +134,4 @@ Sign in as the existing owner and repeat the Phase 2H browser workflow. Homepage
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. The existing Auth user has App Metadata `role` `admin`. A live owner sign-in has not been run. The homepage remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The admin can edit category copy, publication, and pills. The seed post `development-seed-draft` is a draft. The homepage remains static.

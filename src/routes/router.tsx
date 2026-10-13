@@ -3,6 +3,8 @@ import { PageLayout } from '@/layouts/PageLayout'
 import {
   AdminBlogEditorPage,
   AdminBlogListPage,
+  AdminCategoryEditorPage,
+  AdminCategoryListPage,
   AdminDashboardPage,
   AdminLayout,
   AdminLoginPage,
@@ -46,6 +48,8 @@ export const router = createBrowserRouter([
           { path: 'blog', element: <AdminBlogListPage /> },
           { path: 'blog/new', element: <AdminBlogEditorPage /> },
           { path: 'blog/:id', element: <AdminBlogEditorPage /> },
+          { path: 'categories', element: <AdminCategoryListPage /> },
+          { path: 'categories/:id', element: <AdminCategoryEditorPage /> },
           { path: 'media', element: <AdminMediaPage /> },
         ],
       },

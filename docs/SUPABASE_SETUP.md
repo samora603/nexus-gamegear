@@ -3,6 +3,8 @@
 > **Phase:** 2B — Database foundation  
 > **Architecture source:** [DATABASE_PLAN.md](./DATABASE_PLAN.md), [CMS_ARCHITECTURE.md](./CMS_ARCHITECTURE.md)
 
+The sections below record the original setup. The hosted project is `pdqwaftiflaaelwzzypp`. Category pages, the public blog, and the admin CMS now read and write through the browser client and RLS. Login is `/admin/login`. Admin writes require App Metadata `role` `admin`. One confirmed owner exists. See `docs/PROJECT_STATUS.md` for the current phase.
+
 ---
 
 ## 1. Supabase Project Status

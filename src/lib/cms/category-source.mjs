@@ -89,3 +89,22 @@ export function presentCanary(staticView, loaded) {
     view: mergeCanaryCategory(staticView, loaded.category, loaded.resolveUrl),
   }
 }
+
+/**
+ * A successful published snapshot that omits the slug means the category is not public.
+ * Mapping failures still keep the static layout. Query failures are handled by the caller.
+ */
+export function presentPublishedCategory(staticView, categories, resolveUrl) {
+  const cmsCategory = categories.find((entry) => entry.slug === staticView.category.slug)
+  if (!cmsCategory) return { status: 'not-found' }
+  try {
+    const presented = presentCanary(staticView, {
+      ok: true,
+      category: cmsCategory,
+      resolveUrl,
+    })
+    return { status: 'ready', source: presented.source, view: presented.view }
+  } catch {
+    return { status: 'ready', source: 'static-fallback', view: staticView }
+  }
+}
