@@ -1,18 +1,18 @@
 # Project Status — GameGear Nexus
 
-> Last updated: authenticated CMS admin (2026-10-08)
+> Last updated: owner App Metadata role (2026-10-13)
 
 ---
 
 ## Current Phase
 
-**Phase 2G — authenticated CMS admin**
+**Phase 2H — authenticated CMS owner verification**
 
-`/admin` is the site-owner CMS: dashboard counts, blog drafts and publishing, and media uploads into the public `media` bucket. Writes use the signed-in Supabase browser client. `is_admin()` and RLS still decide whether a write succeeds.
+The existing confirmed Auth user on `pdqwaftiflaaelwzzypp` now has App Metadata `role` set to `admin`. `provider` and `providers` were kept. User Metadata was not changed. `public.is_admin()` still reads `auth.jwt() -> app_metadata ->> role`.
 
-`auth.users` is still empty, so sign-in, publish, and upload were not exercised in the browser. Create the owner in the Supabase dashboard and set App Metadata, not User Metadata, to `{ "role": "admin" }`. Do not put the password in the repository.
+No sign-in was performed. The role is stored on the account and will be present in a JWT issued after the next successful sign-in. Dashboard counts, session refresh, blog create/edit/publish/unpublish/delete, media upload, and logout after a real session remain unverified.
 
-The homepage remains static. Category pages and the public blog read path are unchanged.
+The homepage remains static. Category pages and the public blog read path are unchanged. Seeded content was not modified: 1 blog post (`development-seed-draft`) and 38 media assets.
 
 ---
 
@@ -73,22 +73,29 @@ The seed uses `SUPABASE_SERVICE_ROLE_KEY` when it is present. That key is not in
 - [x] Uploads go to the public `media` bucket under `admin/<uuid>.<ext>`
 - [x] Referenced media is blocked before delete
 - [x] Anonymous blog, media, and storage writes were denied. The seed draft title was unchanged
-- [ ] Owner sign-in and live create/publish/upload were not run. No Auth user exists
+- [ ] Owner sign-in and live create/publish/upload were not run
+
+### Phase 2H verification
+- [x] Anonymous blog, media, and storage writes denied again (`npm run test:admin`)
+- [x] Logged-out `/admin` still redirects to `/admin/login?next=%2Fadmin`
+- [x] Public `/`, six category routes, and `/blog` still load. Categories stay `cms` with remote images. The journal is still empty
+- [ ] Admin session, dashboard, blog workflow, and media upload remain unverified
+- [ ] Authenticated non-admin writes remain unverified. No second account was created
 
 ---
 
 ## In Progress
 
-The CMS screens are in the app. They stay unused until the owner Auth user exists.
+The owner role is stored. The CMS workflow still needs a real sign-in before it is verified.
 
 ---
 
 ## Remaining
 
-- Create the owner user and set App Metadata `role` to `admin`
-- Sign in and confirm draft, publish, unpublish, delete, and media upload in the browser
-- Admin JWT write tests (not run; no admin user exists)
-- Authenticated non-admin write tests (no second user was created)
+- Sign in at `/admin/login` and confirm the session reaches `/admin`
+- Confirm draft, publish, unpublish, delete, and media upload in the browser
+- Admin JWT write tests
+- Authenticated non-admin write tests
 - Blog categories/tags were not added. Product categories stay separate
 
 ---
@@ -103,7 +110,7 @@ The CMS screens are in the app. They stay unused until the owner Auth user exist
 
 ## Next Action
 
-Create the owner in the Supabase dashboard, then confirm the CMS mutations with that session. After that, the next content area is the homepage.
+Sign in as the existing owner and repeat the Phase 2H browser workflow. Homepage CMS waits until that gate passes.
 
 ---
 
@@ -120,4 +127,4 @@ Create the owner in the Supabase dashboard, then confirm the CMS mutations with 
 
 ## Cursor State
 
-Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. The admin CMS is implemented, and no Auth user has been created. The homepage remains static.
+Remote content verified on `pdqwaftiflaaelwzzypp`. Category pages are CMS-backed. The public blog reads published posts only. The existing Auth user has App Metadata `role` `admin`. A live owner sign-in has not been run. The homepage remains static.

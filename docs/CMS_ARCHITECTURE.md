@@ -545,3 +545,5 @@ Phase 2G replaces the authorization shell with dashboard, blog, and media screen
 - Uploads validate JPEG, PNG, WebP, GIF, and SVG files up to 8 MB, store them at `admin/<uuid>.<ext>` in the public `media` bucket, then insert `media_assets`. The private `uploads` bucket is unchanged.
 - Delete checks features, collage layers, contact images, categories, content blocks, site settings, and blog posts before removing a media row. A referenced file is left in place.
 - Mutations use `getSupabaseClient()` with the Auth session. `public.is_admin()` remains the database boundary.
+
+Phase 2H checked the live project on 2026-10-13. The existing confirmed Auth user now has App Metadata `role` `admin`, with `provider` and `providers` preserved. `is_admin()` and RLS were not changed. The CMS was not signed in during that update. Homepage CMS stays blocked until an admin session completes the draft, publish, unpublish, delete, and upload checks.
