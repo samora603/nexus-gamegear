@@ -5,6 +5,8 @@ import type { Category } from '@/types/category'
 import type { CategoryCollageConfig } from '@/types/collage'
 
 import { presentPublishedCategory, resolveCategorySource } from './category-source.mjs'
+import { homepageCategoryView, splitHomepageCards } from './homepage-categories.mjs'
+import type { HomepageCategoryView } from './homepage-categories.d.mts'
 import { mediaPublicUrl } from './mappers'
 import { CmsError } from './read-cms.mjs'
 import { loadPublishedCms } from './queries'
@@ -71,4 +73,27 @@ export function useCategoryPageData(slug: string): CategoryPageData {
   if (!usesCms) return { status: 'ready', source: 'static', view: staticView }
   if (!canary || canary.slug !== slug) return { status: 'loading' }
   return canary.data
+}
+
+/** Static cards show immediately. A successful CMS snapshot replaces them. */
+export function useHomepageCategories(): HomepageCategoryView & ReturnType<typeof splitHomepageCards> {
+  const [view, setView] = useState<HomepageCategoryView>(() => homepageCategoryView('loading', categories, []))
+
+  useEffect(() => {
+    let cancelled = false
+    loadPublishedCms()
+      .then((snapshot) => {
+        if (!cancelled) setView(homepageCategoryView('ready', categories, snapshot.categories))
+      })
+      .catch((error: unknown) => {
+        reportCanaryFailure('Homepage categories', error)
+        if (!cancelled) setView(homepageCategoryView('error', categories, []))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const split = splitHomepageCards(view.categories)
+  return { ...view, ...split }
 }

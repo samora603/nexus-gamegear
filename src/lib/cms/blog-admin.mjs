@@ -113,12 +113,17 @@ export function mapWriteError(error) {
   return { field: null, message: 'The post could not be saved.' }
 }
 
-export function interpretDelete(error) {
-  if (!error) return { ok: true, message: '' }
-  if (error.code === '42501' || error.code === 'PGRST301') {
+export function interpretDelete(error, affectedRows) {
+  if (error) {
+    if (error.code === '42501' || error.code === 'PGRST301') {
+      return { ok: false, message: 'The database denied this delete.' }
+    }
+    return { ok: false, message: 'The post could not be deleted.' }
+  }
+  if (!Array.isArray(affectedRows) || affectedRows.length !== 1) {
     return { ok: false, message: 'The database denied this delete.' }
   }
-  return { ok: false, message: 'The post could not be deleted.' }
+  return { ok: true, message: '' }
 }
 
 export function filterPosts(posts, filter) {

@@ -45,7 +45,18 @@ export function mapMediaItem(
 
 export function mediaDeleteDecision(usage: MediaUsage): { allowed: boolean; message: string }
 
-export function interpretMediaDelete(error: { code?: string; message?: string } | null): {
+export function interpretMediaDelete(
+  error: { code?: string; message?: string } | null,
+  affectedRows: { id?: string }[] | null | undefined,
+): {
   ok: boolean
+  removeStorage: boolean
   message: string
 }
+
+export function reportStorageRemoval(storageError: { message?: string } | null): { ok: boolean; message: string }
+
+export function removeConfirmedMedia(actions: {
+  removeRow: () => PromiseLike<{ error: { code?: string; message?: string } | null; data: { id?: string }[] | null }>
+  removeObject: () => PromiseLike<{ error: { message?: string } | null }>
+}): Promise<{ ok: boolean; message: string }>

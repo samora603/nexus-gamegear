@@ -2,7 +2,7 @@ import type { SubCategory } from '@/types/category'
 
 /**
  * Semantic CMS snapshot. Collage CSS stays in `src/data/category-collages.ts`.
- * All six category pages read this snapshot. The homepage does not.
+ * Category pages and the homepage category cards read this snapshot.
  */
 export interface CmsSiteSettings {
   siteName: string
@@ -77,6 +77,7 @@ export interface CmsCategory {
   displayTitle: string
   cardLabel: string
   offsetCard: boolean
+  sortOrder: number
   cardPath: string | null
   pills: SubCategory[]
   collage: CmsCollage

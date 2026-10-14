@@ -44,3 +44,9 @@ export function planPillWrites(
   | { ok: false; errors: { index: number; message: string }[] }
 
 export function mapCategoryWriteError(error: { code?: string; message?: string } | null): string | null
+
+export function confirmAffectedRows(
+  error: { code?: string; message?: string } | null,
+  rows: { id?: string }[] | null | undefined,
+  expectedCount: number,
+): string | null

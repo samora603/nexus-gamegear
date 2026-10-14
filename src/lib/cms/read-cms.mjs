@@ -87,7 +87,10 @@ export function mapCmsRows(rows, supabaseUrl) {
   const heroBackground = mediaPath(supabaseUrl, mediaById, site.hero_background_media_id, 'hero background')
   const heroPhone = mediaPath(supabaseUrl, mediaById, site.hero_phone_media_id, 'hero phone')
 
-  const categories = [...rows.categories].sort((a, b) => a.sort_order - b.sort_order)
+  const categories = [...rows.categories].sort((a, b) => {
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
+    return String(a.slug).localeCompare(String(b.slug))
+  })
   const collageByCategory = new Map(rows.collages.map((row) => [row.category_id, row]))
   const pillsByCategory = new Map()
   for (const pill of rows.pills) {
@@ -165,6 +168,7 @@ export function mapCmsRows(rows, supabaseUrl) {
         displayTitle: category.display_title,
         cardLabel: category.card_label,
         offsetCard: category.offset_card,
+        sortOrder: requireNum(category.sort_order, `${category.slug}.sort_order`),
         cardPath: mediaPath(supabaseUrl, mediaById, category.card_media_id, `${category.slug} card`).storagePath,
         pills: pills.map((pill) => ({ slug: pill.slug, name: pill.label })),
         collage: {

@@ -1108,6 +1108,7 @@ export function buildLocalSemanticModel() {
         displayTitle: category.displayTitle,
         cardLabel: category.cardLabel,
         offsetCard: category.offsetCard,
+        sortOrder: category.sortOrder,
         cardPath: `home/${category.cardFile}`,
         pills: category.pills.map((pill) => ({ slug: pill.slug, name: pill.label })),
         collage: {

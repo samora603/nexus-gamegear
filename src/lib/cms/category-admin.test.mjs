@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { presentPublishedCategory } from './category-source.mjs'
-import { mapCategoryWriteError, movePill, planPillWrites, validateCategoryEdit } from './category-admin.mjs'
+import { confirmAffectedRows, mapCategoryWriteError, movePill, planPillWrites, validateCategoryEdit } from './category-admin.mjs'
 
 const staticView = {
   category: { slug: 'communication-gadgets', name: 'Static' },
@@ -77,6 +77,15 @@ test('authorization and unique failures stay generic', () => {
   assert.match(mapCategoryWriteError({ code: '42501' }) ?? '', /denied/)
   assert.match(mapCategoryWriteError({ code: '23505' }) ?? '', /already exists/)
   assert.equal(mapCategoryWriteError(null), null)
+})
+
+test('pill mutations require the intended affected rows', () => {
+  assert.match(confirmAffectedRows({ code: '42501' }, [{ id: 'a' }], 1) ?? '', /denied/)
+  assert.match(confirmAffectedRows(null, [], 1) ?? '', /denied/)
+  assert.equal(confirmAffectedRows(null, [{ id: 'a' }], 1), null)
+  assert.equal(confirmAffectedRows(null, [{ id: 'a' }, { id: 'b' }], 2), null)
+  assert.match(confirmAffectedRows(null, [{ id: 'a' }], 2) ?? '', /denied/)
+  assert.match(confirmAffectedRows(null, undefined, 1) ?? '', /denied/)
 })
 
 test('an unpublished category is not replaced by the static page', () => {

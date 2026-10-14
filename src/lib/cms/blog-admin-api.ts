@@ -88,6 +88,6 @@ export async function saveAdminPost(id: string | null, input: BlogInput, authorI
 }
 
 export async function deleteAdminPost(id: string) {
-  const { error } = await getSupabaseClient().from('blog_posts').delete().eq('id', id)
-  return interpretDelete(error)
+  const { data, error } = await getSupabaseClient().from('blog_posts').delete().eq('id', id).select('id')
+  return interpretDelete(error, data)
 }

@@ -82,7 +82,10 @@ export function buildPostRecord(input: {
 
 export function mapWriteError(error: { code?: string; message?: string; details?: string } | null): FieldError | null
 
-export function interpretDelete(error: { code?: string; message?: string } | null): { ok: boolean; message: string }
+export function interpretDelete(
+  error: { code?: string; message?: string } | null,
+  affectedRows: { id?: string }[] | null | undefined,
+): { ok: boolean; message: string }
 
 export function filterPosts<T extends { status: string }>(posts: T[], filter: BlogFilter): T[]
 

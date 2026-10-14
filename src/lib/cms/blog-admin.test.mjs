@@ -112,9 +112,13 @@ test('update mapping keeps plain text and the featured image id', () => {
 })
 
 test('delete handling distinguishes denial from other failures', () => {
-  assert.equal(interpretDelete(null).ok, true)
-  assert.match(interpretDelete({ code: '42501' }).message, /denied/)
-  assert.match(interpretDelete({ code: 'XX000' }).message, /could not be deleted/)
+  assert.equal(interpretDelete({ code: '42501' }, [{ id: 'post' }]).ok, false)
+  assert.match(interpretDelete({ code: '42501' }, null).message, /denied/)
+  assert.match(interpretDelete({ code: 'XX000' }, null).message, /could not be deleted/)
+  assert.equal(interpretDelete(null, []).ok, false)
+  assert.match(interpretDelete(null, []).message, /denied/)
+  assert.equal(interpretDelete(null, [{ id: 'post' }]).ok, true)
+  assert.equal(interpretDelete(null, [{ id: 'post' }]).message, '')
 })
 
 test('filters separate published posts from drafts', () => {

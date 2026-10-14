@@ -108,3 +108,12 @@ export function mapCategoryWriteError(error) {
   if (code === '42501' || code === 'PGRST301') return 'The database denied this change.'
   return 'The category could not be saved.'
 }
+
+/** A PostgREST mutation with no error and no returned rows was filtered, usually by RLS. */
+export function confirmAffectedRows(error, rows, expectedCount) {
+  const denied = mapCategoryWriteError(error)
+  if (denied) return denied
+  const count = Array.isArray(rows) ? rows.length : 0
+  if (count !== expectedCount) return 'The database denied this change.'
+  return null
+}

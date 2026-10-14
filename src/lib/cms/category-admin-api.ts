@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '@/lib/supabase'
 
 import {
+  confirmAffectedRows,
   mapCategoryWriteError,
   planPillWrites,
   validateCategoryEdit,
@@ -85,6 +86,7 @@ export async function saveAdminCategory(id: string, input: CategoryEditInput, dr
   if (!pills.ok) return { ok: false as const, field: 'pills', message: pills.errors[0]?.message ?? 'Check the pills.', errors: pills.errors }
 
   const client = getSupabaseClient()
+  // These requests are not one transaction. A later denial leaves the category row and any earlier pill writes saved.
   const updated = await client.from('categories').update(category.value).eq('id', id).select(categoryColumns).maybeSingle()
   const denied = mapCategoryWriteError(updated.error)
   if (denied) return { ok: false as const, field: null, message: denied }
@@ -96,27 +98,36 @@ export async function saveAdminCategory(id: string, input: CategoryEditInput, dr
       .update({ label: pill.label, sort_order: pill.sort_order, published: pill.published })
       .eq('id', pill.id)
       .eq('category_id', id)
-    const message = mapCategoryWriteError(result.error)
+      .select('id')
+    const message = confirmAffectedRows(result.error, result.data, 1)
     if (message) return { ok: false as const, field: 'pills', message }
   }
 
   if (pills.deletes.length > 0) {
-    const removed = await client.from('category_pills').delete().in('id', pills.deletes).eq('category_id', id)
-    const message = mapCategoryWriteError(removed.error)
+    const removed = await client
+      .from('category_pills')
+      .delete()
+      .in('id', pills.deletes)
+      .eq('category_id', id)
+      .select('id')
+    const message = confirmAffectedRows(removed.error, removed.data, pills.deletes.length)
     if (message) return { ok: false as const, field: 'pills', message }
   }
 
   if (pills.inserts.length > 0) {
-    const inserted = await client.from('category_pills').insert(
-      pills.inserts.map((pill) => ({
-        category_id: id,
-        slug: pill.slug,
-        label: pill.label,
-        sort_order: pill.sort_order,
-        published: pill.published,
-      })),
-    )
-    const message = mapCategoryWriteError(inserted.error)
+    const inserted = await client
+      .from('category_pills')
+      .insert(
+        pills.inserts.map((pill) => ({
+          category_id: id,
+          slug: pill.slug,
+          label: pill.label,
+          sort_order: pill.sort_order,
+          published: pill.published,
+        })),
+      )
+      .select('id')
+    const message = confirmAffectedRows(inserted.error, inserted.data, pills.inserts.length)
     if (message) return { ok: false as const, field: 'pills', message }
   }
 

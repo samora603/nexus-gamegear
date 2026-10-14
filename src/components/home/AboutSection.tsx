@@ -1,12 +1,11 @@
-import { categories } from '@/data/categories'
 import { siteSettings } from '@/data/site-settings'
 import { CategoryCard } from '@/components/home/CategoryCard'
 import { SectionHeading } from '@/components/ui/SectionHeading'
-
-const mainCategories = categories.filter((category) => !category.offsetCard)
-const offsetCategory = categories.find((category) => category.offsetCard)
+import { useHomepageCategories } from '@/lib/cms/category-data'
 
 export function AboutSection() {
+  const { status, source, offset, main } = useHomepageCategories()
+
   return (
     <section
       id="explore-solutions"
@@ -28,23 +27,29 @@ export function AboutSection() {
             {siteSettings.exploreHeading}
           </h3>
 
-          <div className="relative mt-8">
-            {offsetCategory && (
-              <div className="mb-4 flex justify-end lg:absolute lg:-top-24 lg:mb-0 lg:w-[calc(20%-0.625rem)]">
-                <CategoryCard
-                  category={offsetCategory}
-                  className="w-full max-w-[12rem] sm:max-w-[14rem] lg:max-w-none"
-                />
-              </div>
-            )}
+          <div className="relative mt-8" data-category-source={source}>
+            {status === 'empty' ? (
+              <p className="font-body text-white/80">No published categories yet.</p>
+            ) : (
+              <>
+                {offset && (
+                  <div className="mb-4 flex justify-end lg:absolute lg:-top-24 lg:mb-0 lg:w-[calc(20%-0.625rem)]">
+                    <CategoryCard
+                      category={offset}
+                      className="w-full max-w-[12rem] sm:max-w-[14rem] lg:max-w-none"
+                    />
+                  </div>
+                )}
 
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
-              {mainCategories.map((category) => (
-                <li key={category.slug}>
-                  <CategoryCard category={category} />
-                </li>
-              ))}
-            </ul>
+                <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
+                  {main.map((category) => (
+                    <li key={category.slug}>
+                      <CategoryCard category={category} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </div>

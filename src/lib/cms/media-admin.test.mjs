@@ -5,7 +5,9 @@ import { publicMediaUrl } from './read-cms.mjs'
 import {
   displayFileName,
   mapMediaItem,
+  interpretMediaDelete,
   mediaDeleteDecision,
+  removeConfirmedMedia,
   safeStoragePath,
   validateMediaFile,
   MAX_UPLOAD_BYTES,
@@ -68,4 +70,47 @@ test('referenced media is not deleted', () => {
     blogPosts: 0,
   })
   assert.equal(free.allowed, true)
+})
+
+test('media deletion requires the deleted row before storage removal', async () => {
+  assert.equal(interpretMediaDelete({ code: '42501' }, [{ id }]).ok, false)
+  assert.equal(interpretMediaDelete({ code: '42501' }, [{ id }]).removeStorage, false)
+  assert.match(interpretMediaDelete({ code: '23503' }, null).message, /referenced/)
+  assert.equal(interpretMediaDelete(null, []).removeStorage, false)
+  assert.match(interpretMediaDelete(null, []).message, /denied/)
+  assert.equal(interpretMediaDelete(null, [{ id }]).ok, true)
+  assert.equal(interpretMediaDelete(null, [{ id }]).removeStorage, true)
+
+  let storageCalls = 0
+  const filtered = await removeConfirmedMedia({
+    removeRow: async () => ({ error: null, data: [] }),
+    removeObject: async () => {
+      storageCalls += 1
+      return { error: null }
+    },
+  })
+  assert.equal(filtered.ok, false)
+  assert.equal(storageCalls, 0)
+
+  const confirmed = await removeConfirmedMedia({
+    removeRow: async () => ({ error: null, data: [{ id }] }),
+    removeObject: async () => {
+      storageCalls += 1
+      return { error: null }
+    },
+  })
+  assert.equal(confirmed.ok, true)
+  assert.equal(confirmed.message, '')
+  assert.equal(storageCalls, 1)
+
+  const storageFailed = await removeConfirmedMedia({
+    removeRow: async () => ({ error: null, data: [{ id }] }),
+    removeObject: async () => {
+      storageCalls += 1
+      return { error: { message: 'storage unavailable' } }
+    },
+  })
+  assert.equal(storageFailed.ok, false)
+  assert.match(storageFailed.message, /library record was removed/)
+  assert.equal(storageCalls, 2)
 })

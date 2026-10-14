@@ -78,16 +78,41 @@ export function mediaDeleteDecision(usage) {
   }
 }
 
-export function interpretMediaDelete(error) {
-  if (!error) return { ok: true, message: '' }
-  if (error.code === '23503') {
+export function interpretMediaDelete(error, affectedRows) {
+  if (error) {
+    if (error.code === '23503') {
+      return {
+        ok: false,
+        removeStorage: false,
+        message: 'This file is still referenced by other CMS content and was not deleted.',
+      }
+    }
+    if (error.code === '42501' || error.code === 'PGRST301') {
+      return { ok: false, removeStorage: false, message: 'The database denied this delete.' }
+    }
+    return { ok: false, removeStorage: false, message: 'The file could not be deleted.' }
+  }
+  if (!Array.isArray(affectedRows) || affectedRows.length !== 1) {
+    return { ok: false, removeStorage: false, message: 'The database denied this delete.' }
+  }
+  return { ok: true, removeStorage: true, message: '' }
+}
+
+export function reportStorageRemoval(storageError) {
+  if (storageError) {
     return {
       ok: false,
-      message: 'This file is still referenced by other CMS content and was not deleted.',
+      message: 'The library record was removed, but the storage file could not be deleted.',
     }
   }
-  if (error.code === '42501' || error.code === 'PGRST301') {
-    return { ok: false, message: 'The database denied this delete.' }
-  }
-  return { ok: false, message: 'The file could not be deleted.' }
+  return { ok: true, message: '' }
+}
+
+/** Removes the storage object only after the media row delete returns that row. */
+export async function removeConfirmedMedia({ removeRow, removeObject }) {
+  const removed = await removeRow()
+  const decision = interpretMediaDelete(removed?.error ?? null, removed?.data)
+  if (!decision.removeStorage) return { ok: false, message: decision.message }
+  const storage = await removeObject()
+  return reportStorageRemoval(storage?.error ?? null)
 }

@@ -2,7 +2,7 @@ import { getSupabaseClient } from '@/lib/supabase'
 
 import {
   displayFileName,
-  interpretMediaDelete,
+  removeConfirmedMedia,
   mapMediaItem,
   mediaDeleteDecision,
   MEDIA_BUCKET,
@@ -118,16 +118,8 @@ export async function deleteMediaAsset(id: string, storagePath: string) {
   if (!decision.allowed) return { ok: false as const, message: decision.message }
 
   const client = getSupabaseClient()
-  const removed = await client.from('media_assets').delete().eq('id', id)
-  const outcome = interpretMediaDelete(removed.error)
-  if (!outcome.ok) return { ok: false as const, message: outcome.message }
-
-  const storage = await client.storage.from(MEDIA_BUCKET).remove([storagePath])
-  if (storage.error) {
-    return {
-      ok: true as const,
-      message: 'The library record was removed, but the storage file could not be deleted.',
-    }
-  }
-  return { ok: true as const, message: '' }
+  return removeConfirmedMedia({
+    removeRow: () => client.from('media_assets').delete().eq('id', id).select('id'),
+    removeObject: () => client.storage.from(MEDIA_BUCKET).remove([storagePath]),
+  })
 }
